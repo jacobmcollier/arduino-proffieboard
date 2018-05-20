@@ -110,7 +110,11 @@ void init( void )
     stm32l4_exti_enable(&stm32l4_exti);
 
 #if (DOSFS_SDCARD == 1)
+#ifdef PIN_SPI_SD_ENABLE    
+    stm32l4_sdspi_initialize_with_cs(PIN_SPI_SD_ENABLE);
+#else    
     stm32l4_sdspi_initialize();
+#endif    
 #elif (DOSFS_SDCARD == 2)
     stm32l4_sdmmc_initialize(0);
 #elif (DOSFS_SDCARD == 3)

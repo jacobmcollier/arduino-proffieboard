@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016 Thomas Roell.  All rights reserved.
+ * Copyright (c) 2016 Fredrik Hubinette.  All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -39,64 +40,68 @@
  */
 extern const PinDescription g_APinDescription[NUM_TOTAL_PINS] =
 {
-    // 0..13 - Digital pins
-    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB11), GPIO_PIN_PB11,            (PIN_ATTR_EXTI),                                 PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB10), GPIO_PIN_PB10,            (PIN_ATTR_EXTI),                                 PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
+    // 0, neopixels 3
+    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB11), GPIO_PIN_PB11_TIM2_CH4,   (PIN_ATTR_PWM | PIN_ATTR_EXTI),                  PWM_INSTANCE_TIM2,  PWM_CHANNEL_4,    ADC_INPUT_NONE },
+    // 1, neopixels 2
+    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB10), GPIO_PIN_PB10_TIM2_CH3,   (PIN_ATTR_PWM | PIN_ATTR_EXTI),                  PWM_INSTANCE_TIM2,  PWM_CHANNEL_3,    ADC_INPUT_NONE },
+    // 2, I2S RCLK
     { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB12), GPIO_PIN_PB12,            (PIN_ATTR_EXTI),                                 PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB13), GPIO_PIN_PB13_TIM15_CH1N, (PIN_ATTR_PWM | PIN_ATTR_EXTI),                  PWM_INSTANCE_TIM15, PWM_CHANNEL_1,    ADC_INPUT_NONE },
-    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB14), GPIO_PIN_PB14_TIM1_CH2N,  (PIN_ATTR_PWM | PIN_ATTR_EXTI),                  PWM_INSTANCE_TIM1,  PWM_CHANNEL_2,    ADC_INPUT_NONE },
-#if (USBD_TYPE == USBD_TYPE_CDC_DAP) || (USBD_TYPE == USBD_TYPE_CDC_MSC_DAP)
-    { NULL,  GPIO_PIN_MASK(GPIO_PIN_PB15), GPIO_PIN_PB15,            0,                                               PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-    { NULL,  GPIO_PIN_MASK(GPIO_PIN_PB8),  GPIO_PIN_PB8,             0,                                               PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-#else /* (USBD_TYPE == USBD_TYPE_CDC_DAP) || (USBD_TYPE == USBD_TYPE_CDC_MSC_DAP) */
-    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB15), GPIO_PIN_PB15_TIM1_CH3N,  (PIN_ATTR_PWM | PIN_ATTR_EXTI),                  PWM_INSTANCE_TIM1,  PWM_CHANNEL_3,    ADC_INPUT_NONE },
-    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB8),  GPIO_PIN_PB8_TIM16_CH1,   (PIN_ATTR_PWM | PIN_ATTR_EXTI),                  PWM_INSTANCE_TIM16, PWM_CHANNEL_1,    ADC_INPUT_NONE },
-#endif /* (USBD_TYPE == USBD_TYPE_CDC_DAP) || (USBD_TYPE == USBD_TYPE_CDC_MSC_DAP) */
+    // 3, I2S BCLK
+    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB13), GPIO_PIN_PB13,            (PIN_ATTR_EXTI),                                 PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
+    // 4, LED Channel 5
+    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB14), GPIO_PIN_PB14_TIM15_CH1,  (PIN_ATTR_PWM | PIN_ATTR_EXTI),                  PWM_INSTANCE_TIM15,  PWM_CHANNEL_1,    ADC_INPUT_NONE },
+    // 5, I2S DATA
+    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB15), GPIO_PIN_PB15,            (PIN_ATTR_EXTI),                                 PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
+    // 6, LED Channel 6
+    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB8),  GPIO_PIN_PB8_TIM16_CH1,   (PIN_ATTR_PWM | PIN_ATTR_EXTI),                  PWM_INSTANCE_TIM16, PWM_CHANNEL_1, ADC_INPUT_NONE    },
+    // 7, I2C SDA
     { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB9),  GPIO_PIN_PB9,             (PIN_ATTR_EXTI),                                 PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-    { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA15), GPIO_PIN_PA15_TIM2_CH1,   (PIN_ATTR_PWM | PIN_ATTR_EXTI),                  PWM_INSTANCE_TIM2,  PWM_CHANNEL_1,    ADC_INPUT_NONE },
+    // 8, RX, PWM or neopixel
+    { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA15), GPIO_PIN_PA15_TIM2_CH1,   (PIN_ATTR_EXTI),                                 PWM_INSTANCE_TIM2,  PWM_CHANNEL_1,    ADC_INPUT_NONE },
+    // 9, TX, PWM or neopixel
     { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA2),  GPIO_PIN_PA2_TIM2_CH3,    (PIN_ATTR_PWM | PIN_ATTR_EXTI | PIN_ATTR_WKUP4), PWM_INSTANCE_TIM2,  PWM_CHANNEL_3,    ADC_INPUT_NONE },
-#if (DOSFS_SDCARD == 1)
-    { NULL,  GPIO_PIN_MASK(GPIO_PIN_PA8),  GPIO_PIN_PA8,             0,                                               PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
+    // 10, LED Channel 4
+    { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA8),  GPIO_PIN_PA8_TIM1_CH1,    PIN_ATTR_PWM,                                    PWM_INSTANCE_TIM1,  PWM_CHANNEL_1,    ADC_INPUT_NONE },
+    // 11, mosi
     { NULL,  GPIO_PIN_MASK(GPIO_PIN_PA7),  GPIO_PIN_PA7,             0,                                               PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
+    // 12, miso
     { NULL,  GPIO_PIN_MASK(GPIO_PIN_PA6),  GPIO_PIN_PA6,             0,                                               PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
+    // 13, sclk
     { NULL,  GPIO_PIN_MASK(GPIO_PIN_PA1),  GPIO_PIN_PA1,             0,                                               PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-#else /* DOSFS_SDCARD == 1*/
-    { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA8),  GPIO_PIN_PA8,             (PIN_ATTR_EXTI),                                 PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-    { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA7),  GPIO_PIN_PA7_TIM1_CH1N,   (PIN_ATTR_PWM | PIN_ATTR_EXTI),                  PWM_INSTANCE_TIM1,  PWM_CHANNEL_1,    ADC_INPUT_NONE },
-    { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA6),  GPIO_PIN_PA6,             (PIN_ATTR_EXTI),                                 PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-    { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA1),  GPIO_PIN_PA1_TIM2_CH2,    (PIN_ATTR_PWM | PIN_ATTR_EXTI),                  PWM_INSTANCE_TIM2,  PWM_CHANNEL_2,    ADC_INPUT_NONE },
-#endif /* DOSFS_SDCARD == 1*/
-
-    // 14..19 - Analog pins
+    // 14, SD Enable
     { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA4),  GPIO_PIN_PA4,             (PIN_ATTR_ADC | PIN_ATTR_DAC | PIN_ATTR_EXTI),   PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_9    },
-    { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA5),  GPIO_PIN_PA5,             (PIN_ATTR_ADC | PIN_ATTR_DAC | PIN_ATTR_EXTI),   PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_10   },
-    { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA0),  GPIO_PIN_PA0,             (PIN_ATTR_ADC | PIN_ATTR_EXTI | PIN_ATTR_WKUP1), PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_5    },
-    { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA3),  GPIO_PIN_PA3,             (PIN_ATTR_ADC | PIN_ATTR_EXTI),                  PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_8    },
-    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB0),  GPIO_PIN_PB0,             (PIN_ATTR_ADC | PIN_ATTR_EXTI),                  PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_15   },
+    // 15, FREE / Neopixels / (PWM if there are no neopixels)
+    { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA5),  GPIO_PIN_PA5_TIM2_CH1,  (PIN_ATTR_ADC|PIN_ATTR_PWM|PIN_ATTR_DAC|PIN_ATTR_EXTI),  PWM_INSTANCE_TIM2, PWM_CHANNEL_1, ADC_INPUT_10 },
+    // 16, ID + neopixels
+    { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA0),  GPIO_PIN_PA0_TIM2_CH1,  (PIN_ATTR_ADC|PIN_ATTR_PWM|PIN_ATTR_EXTI|PIN_ATTR_WKUP1), PWM_INSTANCE_TIM2, PWM_CHANNEL_1, ADC_INPUT_5 },
+    // 17, LED Channel 1
+    { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA3),  GPIO_PIN_PA3_TIM15_CH2,   (PIN_ATTR_ADC | PIN_ATTR_PWM | PIN_ATTR_EXTI),   PWM_INSTANCE_TIM15, PWM_CHANNEL_2,    ADC_INPUT_8    },
+    // 18, LED Channel 3
+    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB0),  GPIO_PIN_PB0_TIM1_CH2N,   (PIN_ATTR_ADC | PIN_ATTR_PWM | PIN_ATTR_EXTI),   PWM_INSTANCE_TIM1,  PWM_CHANNEL_2,    ADC_INPUT_15   },
+    // 19, Vtest
     { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB1),  GPIO_PIN_PB1,             (PIN_ATTR_ADC | PIN_ATTR_EXTI),                  PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_16   },
-
-    // 20..21 - I2C pins (SDA,SCL)
+    // 20, Touchsense cap
     { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB7),  GPIO_PIN_PB7,             (PIN_ATTR_EXTI),                                 PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
+    // 21, Button 1
     { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB6),  GPIO_PIN_PB6,             (PIN_ATTR_EXTI),                                 PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-
-    // 22..24 - SPI/ICSP pins (MISO,MOSI,SCK)
+    // 22, Button 3
     { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB4),  GPIO_PIN_PB4,             (PIN_ATTR_EXTI),                                 PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
+    // 23, Button 2
     { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB5),  GPIO_PIN_PB5,             (PIN_ATTR_EXTI),                                 PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB3),  GPIO_PIN_PB3,             (PIN_ATTR_EXTI),                                 PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-
-    // 25..26 - RX/TX LEDS (output only)
+    // 24, Free 2 / neopixels / (PWM if there are no neopixels)
+    { GPIOB, GPIO_PIN_MASK(GPIO_PIN_PB3),  GPIO_PIN_PB3_TIM2_CH2,    (PIN_ATTR_PWM | PIN_ATTR_EXTI),                  PWM_INSTANCE_TIM2,  PWM_CHANNEL_2,    ADC_INPUT_NONE },
+    // 25
     { NULL,  0,                            GPIO_PIN_NONE,            0,                                               PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
+    // 26, Amplifier Enable
     { GPIOH, GPIO_PIN_MASK(GPIO_PIN_PH1),  GPIO_PIN_PH1,             0,                                               PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-
     // 27..29 - USB (VBUS,DM,DP)
     { NULL,  GPIO_PIN_MASK(GPIO_PIN_PB2),  GPIO_PIN_PB2,             0,                                               PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
     { NULL,  GPIO_PIN_MASK(GPIO_PIN_PA11), GPIO_PIN_PA11,            0,                                               PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
     { NULL,  GPIO_PIN_MASK(GPIO_PIN_PA12), GPIO_PIN_PA12,            0,                                               PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-
-    // 30..31 - UART pins (TX,RX)
+    // 30, I2C SCL
     { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA9),  GPIO_PIN_PA9,            (PIN_ATTR_EXTI),                                  PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-    { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA10), GPIO_PIN_PA10,           (PIN_ATTR_EXTI),                                  PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-
+    // 31, LED Channel 2
+    { GPIOA, GPIO_PIN_MASK(GPIO_PIN_PA10), GPIO_PIN_PA10_TIM1_CH3,  (PIN_ATTR_EXTI | PIN_ATTR_PWM),                   PWM_INSTANCE_TIM1,  PWM_CHANNEL_3,    ADC_INPUT_NONE },
     // 32..37 QSPI pins (NCS,CK,IO0,IO1,IO2,IO3)
     { NULL,  0,                            GPIO_PIN_NONE,           0,                                                PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
     { NULL,  0,                            GPIO_PIN_NONE,           0,                                                PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
@@ -104,9 +109,9 @@ extern const PinDescription g_APinDescription[NUM_TOTAL_PINS] =
     { NULL,  0,                            GPIO_PIN_NONE,           0,                                                PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
     { NULL,  0,                            GPIO_PIN_NONE,           0,                                                PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
     { NULL,  0,                            GPIO_PIN_NONE,           0,                                                PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
-
-    // 38..39 - Digital pins (ATN,BUTTON)
+    // 38, Booster Enable
     { GPIOH, GPIO_PIN_MASK(GPIO_PIN_PH0),  GPIO_PIN_PH0,            (PIN_ATTR_EXTI),                                  PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
+    // 39, Motion Interrupt
     { GPIOC, GPIO_PIN_MASK(GPIO_PIN_PC13), GPIO_PIN_PC13,           (PIN_ATTR_EXTI | PIN_ATTR_WKUP2),                 PWM_INSTANCE_NONE,  PWM_CHANNEL_NONE, ADC_INPUT_NONE },
 };
 
@@ -117,43 +122,52 @@ extern const unsigned int g_PWMInstances[PWM_INSTANCE_COUNT] = {
     TIMER_INSTANCE_TIM16,
 };
 
+// Serial1Pins is the same as Neopixels 2 & 3.
 extern const stm32l4_uart_pins_t g_Serial1Pins = { GPIO_PIN_PB11_USART3_RX, GPIO_PIN_PB10_USART3_TX, GPIO_PIN_NONE, GPIO_PIN_NONE };
 extern const unsigned int g_Serial1Instance = UART_INSTANCE_USART3;
 extern const unsigned int g_Serial1Mode = UART_MODE_RX_DMA | UART_MODE_TX_DMA;
 
+// Don't use, would interfere with LED Channel 2 and I2C CL
 extern const stm32l4_uart_pins_t g_Serial2Pins = { GPIO_PIN_PA10_USART1_RX, GPIO_PIN_PA9_USART1_TX, GPIO_PIN_NONE, GPIO_PIN_NONE };
 extern const unsigned int g_Serial2Instance = UART_INSTANCE_USART1;
 extern const unsigned int g_Serial2Mode = UART_MODE_RX_DMA | UART_MODE_TX_DMA;
 
+// RX/TX, please use this one.
 extern const stm32l4_uart_pins_t g_Serial3Pins = { GPIO_PIN_PA15_USART2_RX, GPIO_PIN_PA2_USART2_TX, GPIO_PIN_NONE, GPIO_PIN_NONE };
 extern const unsigned int g_Serial3Instance = UART_INSTANCE_USART2;
 extern const unsigned int g_Serial3Mode = UART_MODE_RX_DMA;
 
+// SD card
 extern const stm32l4_spi_pins_t g_SPIPins = { GPIO_PIN_PA7_SPI1_MOSI, GPIO_PIN_PA6_SPI1_MISO, GPIO_PIN_PA1_SPI1_SCK, GPIO_PIN_NONE };
 extern const unsigned int g_SPIInstance = SPI_INSTANCE_SPI1;
 extern const unsigned int g_SPIMode = SPI_MODE_RX_DMA | SPI_MODE_TX_DMA | SPI_MODE_RX_DMA_SECONDARY | SPI_MODE_TX_DMA_SECONDARY;
 
+// Please do not use.
 extern const stm32l4_spi_pins_t g_SPI1Pins = { GPIO_PIN_PB5_SPI3_MOSI, GPIO_PIN_PB4_SPI3_MISO, GPIO_PIN_PB3_SPI3_SCK, GPIO_PIN_NONE };
 extern const unsigned int g_SPI1Instance = SPI_INSTANCE_SPI3;
 extern const unsigned int g_SPI1Mode = SPI_MODE_RX_DMA | SPI_MODE_TX_DMA | SPI_MODE_RX_DMA_SECONDARY | SPI_MODE_TX_DMA_SECONDARY;
 
+// Please do not use.
 extern const stm32l4_spi_pins_t g_SPI2Pins = { GPIO_PIN_PB15_SPI2_MOSI, GPIO_PIN_PB14_SPI2_MISO, GPIO_PIN_PB13_SPI2_SCK, GPIO_PIN_NONE };
 extern const unsigned int g_SPI2Instance = SPI_INSTANCE_SPI2;
 extern const unsigned int g_SPI2Mode = 0;
 
-
-extern const stm32l4_i2c_pins_t g_WirePins = { GPIO_PIN_PB8_I2C1_SCL, GPIO_PIN_PB9_I2C1_SDA };
+// Main I2C
+extern const stm32l4_i2c_pins_t g_WirePins = { GPIO_PIN_PA9_I2C1_SCL, GPIO_PIN_PB9_I2C1_SDA };
 extern const unsigned int g_WireInstance = I2C_INSTANCE_I2C1;
 extern const unsigned int g_WireMode = I2C_MODE_RX_DMA;
 
+// Please do not use.
 extern const stm32l4_i2c_pins_t g_Wire1Pins = { GPIO_PIN_PB13_I2C2_SCL, GPIO_PIN_PB14_I2C2_SDA };
 extern const unsigned int g_Wire1Instance = I2C_INSTANCE_I2C2;
 extern const unsigned int g_Wire1Mode = 0;
 
+// I2C
 extern const stm32l4_sai_pins_t g_SAIPins = { GPIO_PIN_PB13_SAI1_SCK_A, GPIO_PIN_PB12_SAI1_FS_A, GPIO_PIN_PB15_SAI1_SD_A, GPIO_PIN_PB14_SAI1_MCLK_A };
 extern const unsigned int g_SAIInstance = SAI_INSTANCE_SAI1A;
 extern const unsigned int g_SAIMode = SAI_MODE_DMA | SAI_MODE_DMA_SECONDARY;
 
+// Please do not use.
 extern const stm32l4_sai_pins_t g_SAI1Pins = { GPIO_PIN_PB3_SAI1_SCK_B, GPIO_PIN_PB6_SAI1_FS_B, GPIO_PIN_PB5_SAI1_SD_B, GPIO_PIN_PB4_SAI1_MCLK_B };
 extern const unsigned int g_SAI1Instance = SAI_INSTANCE_SAI1B;
 extern const unsigned int g_SAI1Mode = SAI_MODE_DMA | SAI_MODE_DMA_SECONDARY;

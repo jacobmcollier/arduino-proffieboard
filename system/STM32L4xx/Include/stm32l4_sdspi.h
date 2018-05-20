@@ -128,6 +128,7 @@ struct _stm32l4_sdspi_t {
 };
 
 extern int stm32l4_sdspi_initialize(void);
+extern int stm32l4_sdspi_initialize_with_cs(int cs);
 
 #if (DOSFS_CONFIG_STATISTICS == 1)
 

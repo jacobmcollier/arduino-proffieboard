@@ -2084,7 +2084,8 @@ static const dosfs_device_interface_t stm32l4_sdspi_interface = {
     stm32l4_sdspi_sync,
 };
 
-int stm32l4_sdspi_initialize(void)
+
+int stm32l4_sdspi_initialize_with_cs(int cs)
 {
     stm32l4_sdspi_t *sdspi = (stm32l4_sdspi_t*)&stm32l4_sdspi;
     int status = F_NO_ERROR;
@@ -2102,14 +2103,14 @@ int stm32l4_sdspi_initialize(void)
 	sdspi->pins.mosi = GPIO_PIN_PC12_SPI3_MOSI;
 	sdspi->pins.miso = GPIO_PIN_PC11_SPI3_MISO;
 	sdspi->pins.sck  = GPIO_PIN_PC10_SPI3_SCK;
-	sdspi->pins.cs   = GPIO_PIN_PD2;
+	sdspi->pins.cs   = cs;
 	sdspi->SPI       = SPI3;
 #else /* defined(STM32L476xx) || defined(STM32L496xx) */
 	sdspi->instance  = SPI_INSTANCE_SPI1;
 	sdspi->pins.mosi = GPIO_PIN_PA7_SPI1_MOSI;
 	sdspi->pins.miso = GPIO_PIN_PA6_SPI1_MISO;
 	sdspi->pins.sck  = GPIO_PIN_PA1_SPI1_SCK;
-	sdspi->pins.cs   = GPIO_PIN_PA8;
+	sdspi->pins.cs   = cs;
 	sdspi->SPI       = SPI1;
 #endif /* defined(STM32L476xx) || defined(STM32L496xx) */
 
@@ -2124,4 +2125,13 @@ int stm32l4_sdspi_initialize(void)
     dosfs_device.lock = 0;
 
     return status;
+}
+
+int stm32l4_sdspi_initialize()
+{
+#if defined(STM32L476xx) || defined(STM32L496xx)
+  return stm32l4_sdspi_initialize_with_cs(GPIO_PIN_PD2);
+#else  
+  return stm32l4_sdspi_initialize_with_cs(GPIO_PIN_PA8);
+#endif
 }

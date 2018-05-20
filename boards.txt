@@ -505,3 +505,91 @@ NUCLEO-L476RG.menu.opt.o2.build.flags.ldspecs=
 NUCLEO-L476RG.menu.opt.o3=Fastest
 NUCLEO-L476RG.menu.opt.o3.build.flags.optimize=-O3
 NUCLEO-L476RG.menu.opt.o3.build.flags.ldspecs=
+
+# Proffieboard
+# ---------------------------------------
+Proffieboard-L433CC.name=Proffieboard
+Proffieboard-L433CC.vid.0=0x1209
+Proffieboard-L433CC.pid.0=0x6668
+
+Proffieboard-L433CC.upload.tool=stm32l4_dfu
+Proffieboard-L433CC.upload.protocol=dfu
+Proffieboard-L433CC.upload.maximum_size=245760
+Proffieboard-L433CC.upload.use_1200bps_touch=true
+Proffieboard-L433CC.upload.wait_for_upload_port=false
+Proffieboard-L433CC.upload.native_usb=false
+
+Proffieboard-L433CC.build.mcu=cortex-m4
+Proffieboard-L433CC.build.f_cpu=80000000L
+Proffieboard-L433CC.build.board=STM32L4_BUTTERLY
+Proffieboard-L433CC.build.arch=STM32L4
+Proffieboard-L433CC.build.core=stm32l4
+Proffieboard-L433CC.build.vid=0x1209
+Proffieboard-L433CC.build.pid=0x6668
+Proffieboard-L433CC.build.did=0xffff
+Proffieboard-L433CC.build.usb_manufacturer="hubbe.net"
+Proffieboard-L433CC.build.usb_product="Proffieboard"
+Proffieboard-L433CC.build.extra_flags=-DSTM32L433xx -D__FPU_PRESENT=1 -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mabi=aapcs -mslow-flash-data -fsingle-precision-constant {build.usb_flags} {build.dosfs_flags}
+Proffieboard-L433CC.build.ldscript=linker_scripts/STM32L433CC_FLASH.ld
+Proffieboard-L433CC.build.openocdscript=openocd_scripts/stm32l433cc_butterfly.cfg
+Proffieboard-L433CC.build.variant=STM32L433CC-Proffieboard
+Proffieboard-L433CC.build.variant_system_libs="-L{runtime.platform.path}/system/STM32L4xx/Lib" "-L{runtime.platform.path}/system/CMSIS/Lib" -lstm32l433 -larm_cortexM4lf_math
+Proffieboard-L433CC.build.variant_system_include="-I{runtime.platform.path}/system/CMSIS/Include" "-I{runtime.platform.path}/system/CMSIS/Device/ST/STM32L4xx/Include" "-I{runtime.platform.path}/system/STM32L4xx/Include" 
+
+Proffieboard-L433CC.menu.usb.cdc=Serial
+Proffieboard-L433CC.menu.usb.cdc.build.usb_type=USB_TYPE_CDC
+Proffieboard-L433CC.menu.usb.cdc_msc=Serial + Mass Storage
+Proffieboard-L433CC.menu.usb.cdc_msc.build.usb_type=USB_TYPE_CDC_MSC
+Proffieboard-L433CC.menu.usb.cdc_hid=Serial + Keyboard + Mouse
+Proffieboard-L433CC.menu.usb.cdc_hid.build.usb_type=USB_TYPE_CDC_HID
+Proffieboard-L433CC.menu.usb.cdc_msc_hid=Serial + Mass Storage + Keyboard + Mouse
+Proffieboard-L433CC.menu.usb.cdc_msc_hid.build.usb_type=USB_TYPE_CDC_MSC_HID
+Proffieboard-L433CC.menu.usb.cdc_dap=Serial + CMSIS-DAP
+Proffieboard-L433CC.menu.usb.cdc_dap.build.usb_type=USB_TYPE_CDC_DAP
+Proffieboard-L433CC.menu.usb.cdc_msc_dap=Serial + Mass Storage + CMSIS-DAP
+Proffieboard-L433CC.menu.usb.cdc_msc_dap.build.usb_type=USB_TYPE_CDC_MSC_DAP
+Proffieboard-L433CC.menu.usb.none=No USB
+Proffieboard-L433CC.menu.usb.none.build.usb_type=USB_TYPE_NONE
+
+Proffieboard-L433CC.menu.dosfs.none=None
+Proffieboard-L433CC.menu.dosfs.none.build.dosfs_sdcard=0
+Proffieboard-L433CC.menu.dosfs.none.build.dosfs_sflash=0
+Proffieboard-L433CC.menu.dosfs.sdspi=SDCARD (SPI)
+Proffieboard-L433CC.menu.dosfs.sdspi.build.dosfs_sdcard=1
+Proffieboard-L433CC.menu.dosfs.sdspi.build.dosfs_sflash=0
+
+Proffieboard-L433CC.menu.speed.80=80 MHz
+Proffieboard-L433CC.menu.speed.80.build.f_cpu=80000000L
+Proffieboard-L433CC.menu.speed.72=72 MHz
+Proffieboard-L433CC.menu.speed.72.build.f_cpu=72000000L
+Proffieboard-L433CC.menu.speed.64=64 MHz
+Proffieboard-L433CC.menu.speed.64.build.f_cpu=64000000L
+Proffieboard-L433CC.menu.speed.48=48 MHz
+Proffieboard-L433CC.menu.speed.48.build.f_cpu=48000000L
+Proffieboard-L433CC.menu.speed.32=32 MHz
+Proffieboard-L433CC.menu.speed.32.build.f_cpu=32000000L
+Proffieboard-L433CC.menu.speed.24=24 MHz
+Proffieboard-L433CC.menu.speed.24.build.f_cpu=24000000L
+Proffieboard-L433CC.menu.speed.16=16 MHz (No USB)
+Proffieboard-L433CC.menu.speed.16.build.f_cpu=16000000L
+Proffieboard-L433CC.menu.speed.8=8 MHz (No USB)
+Proffieboard-L433CC.menu.speed.8.build.f_cpu=8000000L
+Proffieboard-L433CC.menu.speed.4=4 MHz (No USB)
+Proffieboard-L433CC.menu.speed.4.build.f_cpu=4000000L
+Proffieboard-L433CC.menu.speed.2=2 MHz (No USB)
+Proffieboard-L433CC.menu.speed.2.build.f_cpu=2000000L
+Proffieboard-L433CC.menu.speed.1=1 MHz (No USB)
+Proffieboard-L433CC.menu.speed.1.build.f_cpu=1000000L
+
+Proffieboard-L433CC.menu.opt.os=Smallest Code
+Proffieboard-L433CC.menu.opt.os.build.flags.optimize=-Os
+Proffieboard-L433CC.menu.opt.os.build.flags.ldspecs=--specs=nano.specs
+Proffieboard-L433CC.menu.opt.o1=Fast
+Proffieboard-L433CC.menu.opt.o1.build.flags.optimize=-O1
+Proffieboard-L433CC.menu.opt.o1.build.flags.ldspecs=
+Proffieboard-L433CC.menu.opt.o2=Faster
+Proffieboard-L433CC.menu.opt.o2.build.flags.optimize=-O2
+Proffieboard-L433CC.menu.opt.o2.build.flags.ldspecs=
+Proffieboard-L433CC.menu.opt.o3=Fastest
+Proffieboard-L433CC.menu.opt.o3.build.flags.optimize=-O3
+Proffieboard-L433CC.menu.opt.o3.build.flags.ldspecs=

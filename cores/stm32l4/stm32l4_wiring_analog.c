@@ -266,7 +266,7 @@ void analogWrite(uint32_t pin, uint32_t value)
 
 	if (stm32l4_pwm[instance].state == TIMER_STATE_NONE)
 	{
-	    stm32l4_timer_create(&stm32l4_pwm[instance], g_PWMInstances[instance], STM32L4_PWM_IRQ_PRIORITY, 0);
+	    stm32l4_timer_create(&stm32l4_pwm[instance], g_PWMInstances[instance], 15, 0);
 
 	    if (_writeFrequency[instance] && _writeRange[instance])
 	    {

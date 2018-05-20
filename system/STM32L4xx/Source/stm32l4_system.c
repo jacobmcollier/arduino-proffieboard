@@ -863,6 +863,8 @@ void stm32l4_system_initialize(uint32_t hclk, uint32_t pclk1, uint32_t pclk2, ui
 		}
 	    }
 	}
+    } else {
+        RCC->CR |= RCC_CR_HSEBYP;
     }
     
     /* If not coming back from STANDBY, initialize the .databkp section */
