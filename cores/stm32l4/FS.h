@@ -29,9 +29,9 @@ class File;
 class Dir;
 
 enum SeekMode {
-    SeekSet = 0,
-    SeekCur = 1,
-    SeekEnd = 2
+  SeekSet = F_SEEK_SET,
+  SeekCur = F_SEEK_CUR,
+  SeekEnd = F_SEEK_END
 };
 
 class File : public Stream

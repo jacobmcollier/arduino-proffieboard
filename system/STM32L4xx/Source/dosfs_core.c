@@ -7014,7 +7014,7 @@ static dosfs_file_t * dosfs_file_enumerate(dosfs_volume_t *volume, dosfs_file_t 
 
     dosfs_file_t *file_s, *file_e;
 
-    file_s = (file == NULL) ? &volume->file_table[0] : NULL;
+    file_s = (file == NULL) ? &volume->file_table[0] : file + 1;
     file_e = &volume->file_table[DOSFS_CONFIG_MAX_FILES];
 
     file = NULL;

@@ -529,7 +529,7 @@ Proffieboard-L433CC.build.pid=0x6668
 Proffieboard-L433CC.build.did=0xffff
 Proffieboard-L433CC.build.usb_manufacturer="hubbe.net"
 Proffieboard-L433CC.build.usb_product="Proffieboard"
-Proffieboard-L433CC.build.extra_flags=-DSTM32L433xx -D__FPU_PRESENT=1 -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mabi=aapcs -mslow-flash-data -fsingle-precision-constant {build.usb_flags} {build.dosfs_flags}
+Proffieboard-L433CC.build.extra_flags=-DSTM32L433xx -D__FPU_PRESENT=1 -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mabi=aapcs -mslow-flash-data -fsingle-precision-constant -felide-constructors -flto {build.usb_flags} {build.dosfs_flags}
 Proffieboard-L433CC.build.ldscript=linker_scripts/STM32L433CC_FLASH.ld
 Proffieboard-L433CC.build.openocdscript=openocd_scripts/stm32l433cc_butterfly.cfg
 Proffieboard-L433CC.build.variant=STM32L433CC-Proffieboard

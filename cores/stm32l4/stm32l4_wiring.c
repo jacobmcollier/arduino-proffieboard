@@ -65,8 +65,25 @@ const __attribute__((section(".iap_info"))) stm32l4_iap_info_t stm32l4_iap_info 
 stm32l4_adc_t stm32l4_adc;
 stm32l4_exti_t stm32l4_exti;
 
-void HardFault_Handler(void)
+void __attribute__((naked)) HardFault_Handler (void)
 {
+  asm volatile(
+    " tst lr,#4       \n"
+    " ite eq          \n"
+    " mrseq r0,msp    \n"
+    " mrsne r0,psp    \n"
+    " mov r1,lr       \n"
+    " ldr r2,=HardFault_Handler_C\n"
+    " bx r2"
+    : /* Outputs */
+    : /* Inputs */
+    : /* Clobbers */
+    );
+}
+  
+void __attribute__((used)) HardFault_Handler_C(uint32_t *frame, uint32_t lr)
+{
+  volatile uint32_t pc = frame[6];
     while (1)
     {
 #if defined(USBCON)
@@ -74,7 +91,7 @@ void HardFault_Handler(void)
 #endif
     }
 }
-
+  
 void BusFault_Handler(void)
 {
     while (1)
@@ -110,11 +127,32 @@ void init( void )
     stm32l4_exti_enable(&stm32l4_exti);
 
 #if (DOSFS_SDCARD == 1)
+    extern const stm32l4_spi_pins_t g_SPIPins;
+    extern const stm32l4_spi_pins_t g_SPI3Pins;
+    return stm32l4_sdspi_initialize_with_pins(
+#if defined(STM32L476xx) || defined(STM32L496xx)
+      SPI_INSTANCE_SPI3,
+      g_SPI3Pins.mosi,
+      g_SPI3Pins.miso,
+      g_SPI3Pins.sck,
 #ifdef PIN_SPI_SD_ENABLE    
-    stm32l4_sdspi_initialize_with_cs(PIN_SPI_SD_ENABLE);
+      PIN_SPI_SD_ENABLE
 #else    
-    stm32l4_sdspi_initialize();
-#endif    
+      GPIO_PIN_PD2
+#endif // PIN_SPI_SD_ENABLE    
+#else
+      SPI_INSTANCE_SPI1,
+      g_SPIPins.mosi,
+      g_SPIPins.miso,
+      g_SPIPins.sck,
+#ifdef PIN_SPI_SD_ENABLE    
+      PIN_SPI_SD_ENABLE
+#else    
+      GPIO_PIN_PA8
+#endif // PIN_SPI_SD_ENABLE    
+#endif
+    );
+    
 #elif (DOSFS_SDCARD == 2)
     stm32l4_sdmmc_initialize(0);
 #elif (DOSFS_SDCARD == 3)

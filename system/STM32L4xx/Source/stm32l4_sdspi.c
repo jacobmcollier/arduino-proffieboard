@@ -2085,7 +2085,11 @@ static const dosfs_device_interface_t stm32l4_sdspi_interface = {
 };
 
 
-int stm32l4_sdspi_initialize_with_cs(int cs)
+int stm32l4_sdspi_initialize_with_pins(int instance,
+				       int mosi,
+				       int miso,
+				       int sck,
+				       int cs)
 {
     stm32l4_sdspi_t *sdspi = (stm32l4_sdspi_t*)&stm32l4_sdspi;
     int status = F_NO_ERROR;
@@ -2096,30 +2100,23 @@ int stm32l4_sdspi_initialize_with_cs(int cs)
 
     sdspi->option = 0;
 
-    if (sdspi->state == STM32L4_SDSPI_STATE_NONE)
-    {
-#if defined(STM32L476xx) || defined(STM32L496xx)
-	sdspi->instance  = SPI_INSTANCE_SPI3;
-	sdspi->pins.mosi = GPIO_PIN_PC12_SPI3_MOSI;
-	sdspi->pins.miso = GPIO_PIN_PC11_SPI3_MISO;
-	sdspi->pins.sck  = GPIO_PIN_PC10_SPI3_SCK;
-	sdspi->pins.cs   = cs;
-	sdspi->SPI       = SPI3;
-#else /* defined(STM32L476xx) || defined(STM32L496xx) */
-	sdspi->instance  = SPI_INSTANCE_SPI1;
-	sdspi->pins.mosi = GPIO_PIN_PA7_SPI1_MOSI;
-	sdspi->pins.miso = GPIO_PIN_PA6_SPI1_MISO;
-	sdspi->pins.sck  = GPIO_PIN_PA1_SPI1_SCK;
-	sdspi->pins.cs   = cs;
-	sdspi->SPI       = SPI1;
-#endif /* defined(STM32L476xx) || defined(STM32L496xx) */
-
-	/* Try GO_IDLE after a reset, as the SDCARD could be still
-	 * powered during the reset.
-	 */
-	stm32l4_sdspi_idle(sdspi, NULL);
-
-	sdspi->state = STM32L4_SDSPI_STATE_INIT;
+    if (sdspi->state == STM32L4_SDSPI_STATE_NONE) {
+      sdspi->instance  = instance;
+      sdspi->pins.mosi = mosi;
+      sdspi->pins.miso = miso;
+      sdspi->pins.sck  = sck;
+      sdspi->pins.cs   = cs;
+      switch (instance) {
+	case SPI_INSTANCE_SPI1: sdspi->SPI = SPI1; break;
+	case SPI_INSTANCE_SPI3: sdspi->SPI = SPI3; break;
+      }
+      
+      /* Try GO_IDLE after a reset, as the SDCARD could be still
+       * powered during the reset.
+       */
+      stm32l4_sdspi_idle(sdspi, NULL);
+      
+      sdspi->state = STM32L4_SDSPI_STATE_INIT;
     }
     
     dosfs_device.lock = 0;
@@ -2129,9 +2126,19 @@ int stm32l4_sdspi_initialize_with_cs(int cs)
 
 int stm32l4_sdspi_initialize()
 {
+  return stm32l4_sdspi_initialize_with_pins(
 #if defined(STM32L476xx) || defined(STM32L496xx)
-  return stm32l4_sdspi_initialize_with_cs(GPIO_PIN_PD2);
-#else  
-  return stm32l4_sdspi_initialize_with_cs(GPIO_PIN_PA8);
+    SPI_INSTANCE_SPI3,
+    GPIO_PIN_PC12_SPI3_MOSI,
+    GPIO_PIN_PC11_SPI3_MISO,
+    GPIO_PIN_PC10_SPI3_SCK,
+    GPIO_PIN_PD2
+#else
+    SPI_INSTANCE_SPI1,
+    GPIO_PIN_PA7_SPI1_MOSI,
+    GPIO_PIN_PA6_SPI1_MISO,
+    GPIO_PIN_PA1_SPI1_SCK,
+    GPIO_PIN_PA8
 #endif
+    );
 }
