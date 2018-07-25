@@ -1,12 +1,6 @@
-# Arduino Plugin for Proffieboards
+# Arduino Plugin for [Proffieboard](https://fredrik.hubbe.net/lightsaber/v4/)
 
-## Supported boards
-
-### Proffieboards
- * [Proffieboard V1.5](https://fredrik.hubbe.net/lightsaber/v4/)
-
-### Other boards
- * This core retains the support for boards from the Arduino STM32L4 core that it is based on.
+This core retains the support for boards from the Arduino STM32L4 core that it is based on.
 
 ## Installing
 
