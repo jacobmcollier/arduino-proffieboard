@@ -35,6 +35,9 @@
 #define CDC_TX_PACKET_SIZE  128
 #define CDC_TX_PACKET_SMALL 64
 
+// Don't allow blocking when serial is not connected.
+#define SHOULD_BLOCK() (_blocking && __get_IPSR() == 0 && this->operator bool())
+
 stm32l4_usbd_cdc_t stm32l4_usbd_cdc;
 
 extern int (*stm32l4_stdio_put)(char, FILE*);
@@ -176,9 +179,9 @@ size_t CDC::write(const uint8_t *buffer, size_t size)
     }
 
     if (_tx_size2 != 0) {
-	if (!_blocking || (__get_IPSR() != 0)) {
-	    return 0;
-	}
+        if (!SHOULD_BLOCK()) {
+          return 0;
+        }
 	
 	while (_tx_size2 != 0) {
 	    armv7m_core_yield();
@@ -193,7 +196,7 @@ size_t CDC::write(const uint8_t *buffer, size_t size)
 
 	if (tx_count == 0) {
 
-	    if (!_blocking || (__get_IPSR() != 0)) {
+            if (!SHOULD_BLOCK()) {
 		break;
 	    }
 
@@ -218,7 +221,7 @@ size_t CDC::write(const uint8_t *buffer, size_t size)
 		}
 	    }
 
-	    while (CDC_TX_BUFFER_SIZE == _tx_count) {
+	    while (CDC_TX_BUFFER_SIZE == _tx_count && SHOULD_BLOCK()) {
 		armv7m_core_yield();
 	    }
 
