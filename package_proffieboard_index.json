@@ -1,0 +1,74 @@
+{
+  "packages": [
+    {
+      "name": "proffieboard",
+      "maintainer": "Fredrik Hubinette",
+      "websiteURL": "https://github.com/profezzorn/arduino-STM32L4",
+      "email": "hubbe@hubbe.net",
+      "help": {
+        "online": "https://github.com/profezzorn/arduino-STM32L4/issues"
+      },
+      "platforms": [
+        {
+          "name": "STM32L4 Boards",
+          "architecture": "stm32l4",
+          "version": "0.0.1",
+          "category": "Contributed",
+          "help": {
+            "online": "https://github.com/profezzorn/arduino-STM32L4/issues"
+          },
+          "url": "https://github.com/profezzorn/arduino-STM32L4/archive/0.0.1.tar.gz",
+          "archiveFileName": "arduino-proffieboard-0.0.1.tar.gz",
+          "checksum": "MD5:ffb385db84bcbc24c859393c0602b035",
+          "size": "22782908",
+          "boards": [
+            {"name": "Proffieboard"},
+          ],
+          "toolsDependencies": [
+            {
+              "packager": "profezzorn",
+              "name": "arm-none-eabi-gcc",
+              "version": "4_9-2015q3"
+            }
+          ]
+        },
+      ],
+      "tools": [
+        {
+          "name": "arm-none-eabi-gcc",
+          "version": "4_9-2015q3",
+          "systems": [
+            {
+              "host": "i386-apple-darwin11",
+              "url": "https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q3-update/+download/gcc-arm-none-eabi-4_9-2015q3-20150921-mac.tar.bz2",
+              "archiveFileName": "gcc-arm-none-eabi-4_9-2015q3-20150921-mac.tar.bz2",
+              "size": "77455989",
+              "checksum": "MD5:7886163ba5a1c17b560939e3dcf1382b"
+            },
+            {
+              "host": "i686-linux-gnu",
+              "url": "https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q3-update/+download/gcc-arm-none-eabi-4_9-2015q3-20150921-linux.tar.bz2",
+              "archiveFileName": "gcc-arm-none-eabi-4_9-2015q3-20150921-linux.tar.bz2",
+              "size": "73710332",
+              "checksum": "MD5:8a4a74872830f80c788c944877d3ad8c"
+            },
+            {
+              "host": "x86_64-pc-linux-gnu",
+              "url": "https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q3-update/+download/gcc-arm-none-eabi-4_9-2015q3-20150921-linux.tar.bz2",
+              "archiveFileName": "gcc-arm-none-eabi-4_9-2015q3-20150921-linux.tar.bz2",
+              "size": "73710332",
+              "checksum": "MD5:8a4a74872830f80c788c944877d3ad8c"
+            },
+            {
+              "host": "i686-mingw32",
+              "url": "https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q3-update/+download/gcc-arm-none-eabi-4_9-2015q3-20150921-win32.zip",
+              "archiveFileName": "gcc-arm-none-eabi-4_9-2015q3-20150921-win32.zip",
+              "size": "98465351",
+              "checksum": "MD5:d944be40a5bdb2327d80db23290c6b9d"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
