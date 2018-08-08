@@ -3,10 +3,10 @@
     {
       "name": "proffieboard",
       "maintainer": "Fredrik Hubinette",
-      "websiteURL": "https://github.com/profezzorn/arduino-STM32L4",
+      "websiteURL": "https://github.com/profezzorn/arduino-proffieboard",
       "email": "hubbe@hubbe.net",
       "help": {
-        "online": "https://github.com/profezzorn/arduino-STM32L4/issues"
+        "online": "https://github.com/profezzorn/arduino-proffieboard/issues"
       },
       "platforms": [
         {
@@ -15,14 +15,14 @@
           "version": "0.1",
           "category": "Contributed",
           "help": {
-            "online": "https://github.com/profezzorn/arduino-STM32L4/issues"
+            "online": "https://github.com/profezzorn/arduino-proffieboard/issues"
           },
           "url": "https://github.com/profezzorn/arduino-proffieboard/archive/v0.1.tar.gz",
           "archiveFileName": "arduino-proffieboard-v0.1.tar.gz",
           "checksum": "MD5:63d4a1664653ab6132100e8dbfc9c5b6",
           "size": "16959381",
           "boards": [
-            {"name": "Proffieboard"},
+            {"name": "Proffieboard"}
           ],
           "toolsDependencies": [
             {
