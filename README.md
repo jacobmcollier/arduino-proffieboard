@@ -36,17 +36,6 @@
  2. Right-click on ```dpinst_x86.exe``` (32 bit Windows) or ```dpinst_amd64.exe``` (64 bit Windows) and select ```Run as administrator```
  3. Click on ```Install this driver software anyway``` at the ```Windows Security``` popup as the driver is unsigned
 
-### From git (for developers, most people do not need to do this)
-
- 1. Follow steps from Board Manager section above
- 2. ```cd <SKETCHBOOK>```, where ```<SKETCHBOOK>``` is your Arduino Sketch folder:
-  * OS X: ```~/Documents/Arduino```
-  * Linux: ```~/Arduino```
-  * Windows: ```~/Documents/Arduino```
- 3. Create a folder named ```hardware```, if it does not exist, and change directories to it
- 4. Clone this repo: ```git clone https://github.com/profezzorn/arduino-proffieboard.git profezzorn/stm32l4```
- 5. Restart the Arduino IDE
-
 ## Troubleshooting
 
 ### How do I know if uploads are working?
@@ -64,6 +53,17 @@
 
 #### Linux
  Running ```sudo tail -f /var/log/kern.log``` will show you when things connect and disconnect, the lsusb command is also helpful.
+
+## Altenative installation method for developers
+
+ 1. Follow steps from Board Manager section above
+ 2. ```cd <SKETCHBOOK>```, where ```<SKETCHBOOK>``` is your Arduino Sketch folder:
+  * OS X: ```~/Documents/Arduino```
+  * Linux: ```~/Arduino```
+  * Windows: ```~/Documents/Arduino```
+ 3. Create a folder named ```hardware```, if it does not exist, and change directories to it
+ 4. Clone this repo: ```git clone https://github.com/profezzorn/arduino-proffieboard.git profezzorn/stm32l4```
+ 5. Restart the Arduino IDE
 
 ## Credits
 
