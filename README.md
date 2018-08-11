@@ -34,13 +34,13 @@ This core retains the support for boards from the Arduino STM32L4 core that it i
  7. Select ```WinUSB (v6.1.7600.16385)``` as new driver
  8. Click ```Replace Driver```
 
-###### USB Serial driver setup for STM32L4 based boards (Window XP / Windows 7 only)
+###### USB Serial driver setup for STM32L4 based boards (Windows 7/XP only, not for Windows 8 or 10)
 
  1. Go to ~/AppData/Local/Arduino15/packages/profezzorn/hardware/stm32l4/```<VERSION>```/drivers/windows
  2. Right-click on ```dpinst_x86.exe``` (32 bit Windows) or ```dpinst_amd64.exe``` (64 bit Windows) and select ```Run as administrator```
  3. Click on ```Install this driver software anyway``` at the ```Windows Security``` popup as the driver is unsigned
 
-### From git (for core development)
+### From git (for developers who wants make changes to this code only)
 
  1. Follow steps from Board Manager section above
  2. ```cd <SKETCHBOOK>```, where ```<SKETCHBOOK>``` is your Arduino Sketch folder:
