@@ -56,14 +56,14 @@
 
 ## Altenative installation method for developers
 
- 1. Follow steps from Board Manager section above
- 2. ```cd <SKETCHBOOK>```, where ```<SKETCHBOOK>``` is your Arduino Sketch folder:
+ 1. ```cd <SKETCHBOOK>```, where ```<SKETCHBOOK>``` is your Arduino Sketch folder:
   * OS X: ```~/Documents/Arduino```
   * Linux: ```~/Arduino```
   * Windows: ```~/Documents/Arduino```
- 3. Create a folder named ```hardware```, if it does not exist, and change directories to it
- 4. Clone this repo: ```git clone https://github.com/profezzorn/arduino-proffieboard.git profezzorn/stm32l4```
- 5. Restart the Arduino IDE
+ 2. Create a folder named ```hardware```, if it does not exist, and change directories to it
+ 3. Clone this repo: ```git clone https://github.com/profezzorn/arduino-proffieboard.git profezzorn/stm32l4```
+ 4. Restart the Arduino IDE
+ 5. Make sure you install any drivers you need from the instructions at the top.
 
 ## Credits
 
