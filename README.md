@@ -22,7 +22,7 @@
 ##### STM32 BOOTLOADER driver setup for STM32L4 based boards
 
  1. Download [Zadig](http://zadig.akeo.ie)
- 2. Plugin STM32L4 board and toggle the RESET button while holding down the BOOT button
+ 2. Plugin the Proffieboard and toggle the RESET button while holding down the BOOT button
  3. Let Windows finish searching for drivers
  4. Start ```Zadig```
  5. Select ```Options -> List All Devices```
@@ -44,7 +44,7 @@
 
 ### Recovering from a broken upload
 
- Sometimes a faulty sketch can render the normal USB Serial based integration into the Arduindo IDE not working. In this case plugin the STM32L4 board and toggle the RESET button while holding down the BOOT button and program a known to be working sketch to go ack to a working USB Serial setup.
+ Sometimes a faulty sketch can render the normal USB Serial based integration into the Arduindo IDE not working. In this case plugin the Proffieboard and toggle the RESET button while holding down the BOOT button and program a known to be working sketch to go ack to a working USB Serial setup.
 
 ### Connection issues
 
