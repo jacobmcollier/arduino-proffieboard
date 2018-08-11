@@ -2,8 +2,6 @@
 
 ## Installing
 
-### Board Manager
-
  1. [Download and install the Arduino IDE](https://www.arduino.cc/en/Main/Software) (at least version v1.6.8)
  2. Start the Arduino IDE
  3. Go into Preferences
@@ -11,17 +9,17 @@
  5. Open the Boards Manager from the Tools -> Board menu and install "Proffieboard Plugin"
  6. Select Proffieboard Tools -> Board menu
 
-#### OS Specific Setup
+### OS Specific Setup
 
-##### Linux
+#### Linux
 
  1. Go to ~/.arduino15/packages/profezzorn/hardware/stm32l4/```<VERSION>```/drivers/linux/
  2. sudo cp *.rules /etc/udev/rules.d
  3. reboot
 
-#####  Windows
+####  Windows
 
-###### STM32 BOOTLOADER driver setup for STM32L4 based boards
+##### STM32 BOOTLOADER driver setup for STM32L4 based boards
 
  1. Download [Zadig](http://zadig.akeo.ie)
  2. Plugin STM32L4 board and toggle the RESET button while holding down the BOOT button
@@ -32,7 +30,7 @@
  7. Select ```WinUSB (v6.1.7600.16385)``` as new driver
  8. Click ```Replace Driver```
 
-###### USB Serial driver setup for STM32L4 based boards (Windows 7/XP only, not for Windows 8 or 10)
+##### USB Serial driver setup for STM32L4 based boards (Windows 7/XP only, not for Windows 8 or 10)
 
  1. Go to ~/AppData/Local/Arduino15/packages/profezzorn/hardware/stm32l4/```<VERSION>```/drivers/windows
  2. Right-click on ```dpinst_x86.exe``` (32 bit Windows) or ```dpinst_amd64.exe``` (64 bit Windows) and select ```Run as administrator```
