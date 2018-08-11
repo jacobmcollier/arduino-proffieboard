@@ -40,7 +40,7 @@ This core retains the support for boards from the Arduino STM32L4 core that it i
  2. Right-click on ```dpinst_x86.exe``` (32 bit Windows) or ```dpinst_amd64.exe``` (64 bit Windows) and select ```Run as administrator```
  3. Click on ```Install this driver software anyway``` at the ```Windows Security``` popup as the driver is unsigned
 
-### From git (for developers who wants make changes to this code only)
+### From git (for developers, most people do not need to do this)
 
  1. Follow steps from Board Manager section above
  2. ```cd <SKETCHBOOK>```, where ```<SKETCHBOOK>``` is your Arduino Sketch folder:
