@@ -51,9 +51,20 @@ This core retains the support for boards from the Arduino STM32L4 core that it i
  4. Clone this repo: ```git clone https://github.com/profezzorn/arduino-proffieboard.git profezzorn/stm32l4```
  5. Restart the Arduino IDE
 
-## Recovering from a broken upload
+## Troubleshooting
+
+### How do I know if uploads are working?
+
+ Look at the bottom secton of the arduino program. The progress of the upload will show in red text. Unfortunately arduino will not scroll down automatically as uploads are taking place, so if you want to see how it's doing you have to  keep scrolling down while it's working.
+
+### Recovering from a broken upload
 
  Sometimes a faulty sketch can render the normal USB Serial based integration into the Arduindo IDE not working. In this case plugin the STM32L4 board and toggle the RESET button while holding down the BOOT button and program a known to be working sketch to go ack to a working USB Serial setup.
+
+### Connection issues
+
+ Windows 10: go to the control panel and click on Bluetooth & other devices. It should either show "Proffieboard" or "STM32 BOOTLOADER". If you hold BOOT and click RESET, is hould show "STM32 BOOTLOADER". If neither show up, try a different USB port or cable.
+ Linux: Running ```sudo tail -f /var/log/kern.log``` will show you when things connect and disconnect, the lsusb command is also helpful.
 
 ## Credits
 
