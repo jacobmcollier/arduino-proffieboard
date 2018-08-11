@@ -1,7 +1,5 @@
 # Arduino Plugin for [Proffieboard](https://fredrik.hubbe.net/lightsaber/v4/)
 
-This core retains the support for boards from the Arduino STM32L4 core that it is based on.
-
 ## Installing
 
 ### Board Manager
@@ -71,5 +69,5 @@ This core retains the support for boards from the Arduino STM32L4 core that it i
 
 ## Credits
 
-This core is based on the [Arduino STM32L4 Core](https://github.com/GrumpyOldPizza/arduino-STM32L4)
+This core is based on the [Arduino STM32L4 Core](https://github.com/GrumpyOldPizza/arduino-STM32L4). For now, the boards from the original core are still supported by this core.
 
