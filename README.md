@@ -63,8 +63,11 @@ This core retains the support for boards from the Arduino STM32L4 core that it i
 
 ### Connection issues
 
- Windows 10: go to the control panel and click on Bluetooth & other devices. It should either show "Proffieboard" or "STM32 BOOTLOADER". If you hold BOOT and click RESET, is hould show "STM32 BOOTLOADER". If neither show up, try a different USB port or cable.
- Linux: Running ```sudo tail -f /var/log/kern.log``` will show you when things connect and disconnect, the lsusb command is also helpful.
+#### Windows 10
+ Go to the control panel and click on Bluetooth & other devices. It should either show "Proffieboard" or "STM32 BOOTLOADER". If you hold BOOT and click RESET, is hould show "STM32 BOOTLOADER". If neither show up, try a different USB port or cable.
+
+#### Linux
+ Running ```sudo tail -f /var/log/kern.log``` will show you when things connect and disconnect, the lsusb command is also helpful.
 
 ## Credits
 
