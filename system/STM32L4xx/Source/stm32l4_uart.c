@@ -109,32 +109,26 @@ static void stm32l4_uart_dma_callback(stm32l4_uart_t *uart, uint32_t events)
 
 	    overrun = true;
 	}
-	
+
 	rx_total = rx_count;
 	rx_write = uart->rx_write;
-	rx_size  = rx_total;
-	
-	if (rx_size > (uart->rx_size - rx_write))
-	{
+
+	while (rx_total) {
+	  rx_size  = rx_total;
+	  if (rx_size > (uart->rx_size - rx_write))
 	    rx_size = (uart->rx_size - rx_write);
-	}
-	
-	memcpy(&uart->rx_data[rx_write], &uart->rx_fifo[rx_index], rx_size);
-	
-	rx_write += rx_size;
-	rx_index += rx_size;
-	rx_total -= rx_size;
-	
-	if (rx_write == uart->rx_size)
-	{
+	  if (rx_size > (16 - rx_index))
+	    rx_size = 16 - rx_index;
+
+	  memcpy(&uart->rx_data[rx_write], &uart->rx_fifo[rx_index], rx_size);
+	  rx_write += rx_size;
+	  rx_index += rx_size;
+	  rx_total -= rx_size;
+
+	  if (rx_write == uart->rx_size)
 	    rx_write = 0;
-	}
-	
-	if (rx_total)
-	{
-	    memcpy(&uart->rx_data[rx_write], &uart->rx_fifo[rx_index], rx_total);
-	    
-	    rx_write += rx_total;
+	  if (rx_index == sizeof(uart->rx_fifo))
+	    rx_index = 0;
 	}
 	
 	uart->rx_write = rx_write;
