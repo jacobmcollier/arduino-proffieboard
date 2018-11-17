@@ -48,12 +48,12 @@ Proffieboard-L433CC.menu.usb.cdc_msc_dap.build.usb_type=USB_TYPE_CDC_MSC_DAP
 Proffieboard-L433CC.menu.usb.none=No USB
 Proffieboard-L433CC.menu.usb.none.build.usb_type=USB_TYPE_NONE
 
-Proffieboard-L433CC.menu.dosfs.none=None
-Proffieboard-L433CC.menu.dosfs.none.build.dosfs_sdcard=0
-Proffieboard-L433CC.menu.dosfs.none.build.dosfs_sflash=0
 Proffieboard-L433CC.menu.dosfs.sdspi=SDCARD (SPI)
 Proffieboard-L433CC.menu.dosfs.sdspi.build.dosfs_sdcard=1
 Proffieboard-L433CC.menu.dosfs.sdspi.build.dosfs_sflash=0
+Proffieboard-L433CC.menu.dosfs.none=None
+Proffieboard-L433CC.menu.dosfs.none.build.dosfs_sdcard=0
+Proffieboard-L433CC.menu.dosfs.none.build.dosfs_sflash=0
 
 Proffieboard-L433CC.menu.speed.80=80 MHz
 Proffieboard-L433CC.menu.speed.80.build.f_cpu=80000000L
