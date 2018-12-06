@@ -2644,3 +2644,14 @@ void stm32l4_system_dfu(void)
 
     stm32l4_system_reset();
 }
+
+
+/* This replaces the libm sqrt() which is long and complicated with
+ * one that doesn't set errno properly, but is a single 14-cycle
+ * instruction.
+ */
+float __ieee754_sqrtf(float op) {
+  float result;
+  asm volatile ("vsqrt.f32 %0, %1" : "=w" (result) : "w" (op));
+  return result;
+}
