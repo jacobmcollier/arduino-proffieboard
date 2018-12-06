@@ -28,21 +28,6 @@
 
 #include "armv7m_atomic.h"
 
-uint32_t armv7m_atomic_load(volatile uint32_t *p_data)
-{
-    return __atomic_load_n(p_data, __ATOMIC_RELAXED);
-}
-
-void armv7m_atomic_store(volatile uint32_t *p_data, uint32_t data)
-{
-    __atomic_store_n(p_data, data, __ATOMIC_RELAXED);
-}
-
-uint32_t armv7m_atomic_exchange(volatile uint32_t *p_data, uint32_t data)
-{
-    return __atomic_exchange_n(p_data, data, __ATOMIC_RELAXED);
-}
-
 bool armv7m_atomic_compare_exchange(volatile uint32_t *p_data, uint32_t *p_data_expected, uint32_t data)
 {
   return __atomic_compare_exchange_n(p_data, p_data_expected, data, false, __ATOMIC_RELAXED, __ATOMIC_RELAXED);

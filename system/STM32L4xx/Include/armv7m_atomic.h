@@ -36,9 +36,21 @@
  extern "C" {
 #endif
 
-extern uint32_t armv7m_atomic_load(volatile uint32_t *p_data);
-extern void armv7m_atomic_store(volatile uint32_t *p_data, uint32_t data);
-extern uint32_t armv7m_atomic_exchange(volatile uint32_t *p_data, uint32_t data);
+static inline uint32_t armv7m_atomic_load(volatile uint32_t *p_data)
+{
+    return __atomic_load_n(p_data, __ATOMIC_RELAXED);
+}
+static inline void armv7m_atomic_store(volatile uint32_t *p_data, uint32_t data)
+{
+    __atomic_store_n(p_data, data, __ATOMIC_RELAXED);
+}
+   
+static inline uint32_t armv7m_atomic_exchange(volatile uint32_t *p_data, uint32_t data)
+{
+    return __atomic_exchange_n(p_data, data, __ATOMIC_RELAXED);
+}
+
+
 extern bool armv7m_atomic_compare_exchange(volatile uint32_t *p_data, uint32_t *p_data_expected, uint32_t data);
 extern uint32_t armv7m_atomic_add(volatile uint32_t *p_data, uint32_t data);
 extern uint32_t armv7m_atomic_sub(volatile uint32_t *p_data, uint32_t data);
