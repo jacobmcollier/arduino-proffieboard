@@ -5,8 +5,9 @@ CXX      = $(TOOLS)/bin/arm-none-eabi-g++
 AS       = $(TOOLS)/bin/arm-none-eabi-as
 AR       = $(TOOLS)/bin/arm-none-eabi-ar
 LD       = $(TOOLS)/bin/arm-none-eabi-ld
-CFLAGS   = -mcpu=cortex-m4 -mthumb -c -g -Os $(WARNINGS) -std=gnu11 -ffunction-sections -fdata-sections -nostdlib -MMD $(EXTRAS) $(DEFINES) $(INCLUDES)
-CXXFLAGS = -mcpu=cortex-m4 -mthumb -c -g -Os $(WARNINGS) -std=gnu++11 -ffunction-sections -fdata-sections -fno-threadsafe-statics -nostdlib -fno-rtti -fno-exceptions -MMD $(EXTRAS) $(DEFINES) $(INCLUDES)
+OPTFLAGS= -mcpu=cortex-m4 -mthumb -c -g -Os -ffunction-sections -fdata-sections -nostdlib -MMD -ffast-math
+CFLAGS   = $(OPTFLAGS) $(WARNINGS) -std=gnu11 $(EXTRAS) $(DEFINES) $(INCLUDES)
+CXXFLAGS = $(OPTFLAGS)mb -c -g -Os $(WARNINGS) -fno-threadsafe-statics -fno-rtti -fno-exceptions -MMD $(EXTRAS) $(DEFINES) $(INCLUDES)
 ASFLAGS  = -c -g -x assembler-with-cpp $(EXTRAS) $(DEFINES) $(INCLUDES)
 WARNINGS = -Wall -Wextra -Wno-unused-parameter
 EXTRAS   = -D__FPU_PRESENT=1 -march=armv7e-m -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mabi=aapcs -mslow-flash-data
