@@ -75,7 +75,7 @@ SECTIONS
        KEEP(boot_stm32l432.o(.text .text*))
        KEEP(boot_stm32l432.o(.rodata .rodata*))
        KEEP(*(.iap_prefix));
-       . = 2048;
+       . = 1024;
    } > FLASH
 
    .text :
@@ -253,7 +253,7 @@ SECTIONS
 
    __etextbkp = LOADADDR(.backup);
 
-   __FlashBase = ALIGN(LOADADDR(.backup) + SIZEOF(.backup), 2048);
+   __FlashBase = ALIGN(LOADADDR(.backup) + SIZEOF(.backup), 1024);
    __FlashLimit = ORIGIN(FLASH) + LENGTH(FLASH);
 
    /* Stabs debugging sections.  */

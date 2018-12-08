@@ -253,7 +253,7 @@ SECTIONS
 
    __etextbkp = LOADADDR(.backup);
 
-   __FlashBase = ALIGN(LOADADDR(.backup) + SIZEOF(.backup), 2048);
+   __FlashBase = ALIGN(LOADADDR(.backup) + SIZEOF(.backup), 1024);
    __FlashLimit = ORIGIN(FLASH) + LENGTH(FLASH);
 
    /* Stabs debugging sections.  */
