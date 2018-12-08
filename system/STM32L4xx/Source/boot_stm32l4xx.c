@@ -193,18 +193,20 @@ __attribute__((naked)) void reset_stm32l4xx(void)
 	FLASH->ACR = FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_LATENCY_2WS;
     
 	// if (!(PWR->SR1 & PWR_SR1_SBF) && !(RCC->CSR & (RCC_CSR_LPWRRSTF | RCC_CSR_WWDGRSTF | RCC_CSR_IWDGRSTF | RCC_CSR_BORRSTF | RCC_CSR_OBLRSTF | RCC_CSR_FWRSTF)))
+	#if 0
 	if (!(PWR->SR1 & PWR_SR1_SBF) && !(RCC->CSR & (RCC_CSR_WWDGRSTF | RCC_CSR_IWDGRSTF)))
 	{
 	    stm32l4_iap();
 	}
+	#endif
 
 	SCB->CPACR |= ((3UL << 10*2)|(3UL << 11*2));  /* set CP10 and CP11 Full Access */
 
-	SCB->VTOR = 0x08000800;
+	SCB->VTOR = 0x08000400;
 
 	/* Branch off to the application code. Needs to be in assembly for GCC.
 	 */
-	__asm__ volatile ("   ldr     r2, =0x08000800                \n"
+	__asm__ volatile ("   ldr     r2, =0x08000400                \n"
 			  "   ldr     r0, [r2, #0]                   \n"
 			  "   ldr     r1, [r2, #4]                   \n"
 			  "   msr     MSP, r0                        \n"

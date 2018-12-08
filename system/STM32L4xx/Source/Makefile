@@ -25,9 +25,7 @@ INCLUDES = \
 	-I../../../system/STM32L4xx/Include \
 	-I. 
 
-BSRCS = \
-	boot_stm32l4xx.c \
-	stm32l4_iap.c
+BSRCS = boot_stm32l4xx.c
 
 LSRCS = \
 	./DAP/DAP.c \

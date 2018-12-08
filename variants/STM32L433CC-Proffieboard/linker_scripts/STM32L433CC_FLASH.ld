@@ -75,7 +75,7 @@ SECTIONS
        KEEP(boot_stm32l433.o(.text .text*))
        KEEP(boot_stm32l433.o(.rodata .rodata*))
        KEEP(*(.iap_prefix));
-       . = 2048;
+       . = 1024;
    } > FLASH
 
    .text :
