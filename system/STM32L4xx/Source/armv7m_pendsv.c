@@ -63,6 +63,7 @@ volatile armv7m_pendsv_routine_t * armv7m_pendsv_enqueue(armv7m_pendsv_routine_t
 
 	if (pendsv_write_next == armv7m_pendsv_control.pendsv_read)
 	{
+            __asm__ volatile ("cpsie i" : : : "memory");
 	    return NULL;
 	}
     }
@@ -89,7 +90,7 @@ static __attribute__((used)) void armv7m_pendsv_dequeue(void)
 
     while (pendsv_read != armv7m_pendsv_control.pendsv_write)
     {
-      __asm__ volatile ("cpsid i" : : : "memory");
+        __asm__ volatile ("cpsid i" : : : "memory");
 	routine = pendsv_read->routine;
 	context = pendsv_read->context;
 	data = pendsv_read->data;
