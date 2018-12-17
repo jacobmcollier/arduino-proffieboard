@@ -99,6 +99,9 @@ LOBJS_L496 = $(patsubst %.c,_out/stm32l496/%.o,$(filter-out %.S,$(LSRCS_L496))) 
 
 all:: boot_stm32l432.o boot_stm32l433.o boot_stm32l476.o boot_stm32l496.o libstm32l432.a libstm32l433.a libstm32l476.a  libstm32l496.a
 
+install: all
+	cp *.a *.o ../Lib
+
 boot_stm32l432.o:: $(BOBJS_L432)
 	$(LD) -r -o $@ $^
 

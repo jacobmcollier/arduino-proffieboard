@@ -50,6 +50,7 @@ volatile armv7m_pendsv_routine_t * armv7m_pendsv_enqueue(armv7m_pendsv_routine_t
 {
     volatile armv7m_pendsv_entry_t *pendsv_write, *pendsv_write_next;
 
+    __asm__ volatile ("cpsid i" : : : "memory");
     do
     {
         pendsv_write = armv7m_pendsv_control.pendsv_write;
@@ -70,6 +71,7 @@ volatile armv7m_pendsv_routine_t * armv7m_pendsv_enqueue(armv7m_pendsv_routine_t
     pendsv_write->routine = routine;
     pendsv_write->context = context;
     pendsv_write->data = data;
+    __asm__ volatile ("cpsie i" : : : "memory");
 
     SCB->ICSR = SCB_ICSR_PENDSVSET_Msk;
 
@@ -87,7 +89,7 @@ static __attribute__((used)) void armv7m_pendsv_dequeue(void)
 
     while (pendsv_read != armv7m_pendsv_control.pendsv_write)
     {
-
+      __asm__ volatile ("cpsid i" : : : "memory");
 	routine = pendsv_read->routine;
 	context = pendsv_read->context;
 	data = pendsv_read->data;
@@ -100,6 +102,7 @@ static __attribute__((used)) void armv7m_pendsv_dequeue(void)
 	}
 
 	armv7m_pendsv_control.pendsv_read = pendsv_read;
+	__asm__ volatile ("cpsie i" : : : "memory");
 
 	(*routine)(context, data);
     }
