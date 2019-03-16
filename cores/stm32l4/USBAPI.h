@@ -29,6 +29,61 @@
 #pragma once
 
 #include "HardwareSerial.h"
+#include "stm32l4_usbd_cdc.h"
+
+#define USB_TYPE_NONE        0
+#define USB_TYPE_CDC         1
+#define USB_TYPE_CDC_MSC     2
+#define USB_TYPE_CDC_HID     3
+#define USB_TYPE_CDC_MSC_HID 4
+#define USB_TYPE_CDC_DAP     5
+#define USB_TYPE_CDC_MSC_DAP 6
+#define USB_TYPE_CDC_WEBUSB  7
+#define USB_TYPE_CDC_MSC_WEBUSB 8
+
+#if (USB_TYPE == USB_TYPE_CDC)
+#define USB_CLASS USBD_CDC_Initialize
+#define USB_CLASS_CDC
+#endif
+#if (USB_TYPE == USB_TYPE_CDC_MSC)
+#define USB_CLASS USBD_CDC_MSC_Initialize
+#define USB_CLASS_CDC
+#define USB_CLASS_MSC
+#endif
+#if (USB_TYPE == USB_TYPE_CDC_HID)
+#define USB_CLASS USBD_CDC_HID_Initialize
+#define USB_CLASS_CDC
+#define USB_CLASS_HID
+#endif
+#if (USB_TYPE == USB_TYPE_CDC_MSC_HID)
+#define USB_CLASS USBD_CDC_MSC_HID_Initialize
+#define USB_CLASS_CDC
+#define USB_CLASS_MSC
+#define USB_CLASS_HID
+#endif
+#if (USB_TYPE == USB_TYPE_CDC_DAP)
+#define USB_CLASS USBD_CDC_DAP_Initialize
+#define USB_CLASS_CDC
+#define USB_CLASS_DAP
+#endif
+#if (USB_TYPE == USB_TYPE_CDC_MSC_DAP)
+#define USB_CLASS USBD_CDC_MSC_DAP_Initialize
+#define USB_CLASS_CDC
+#define USB_CLASS_MSC
+#define USB_CLASS_DAP
+#endif
+#if (USB_TYPE == USB_TYPE_CDC_WEBUSB)
+#define USB_CLASS USBD_CDC_WEBUSB_Initialize
+#define USB_CLASS_CDC
+#define USB_CLASS_WEBUSB
+#endif
+#if (USB_TYPE == USB_TYPE_CDC_MSC_WEBUSB)
+#define USB_CLASS USBD_CDC_MSC_WEBUSB_Initialize
+#define USB_CLASS_CDC
+#define USB_CLASS_MSC
+#define USB_CLASS_WEBUSB
+#endif
+
 
 class USBDeviceClass
 {
@@ -51,13 +106,12 @@ private:
 
 extern USBDeviceClass USBDevice;
 
-#define CDC_RX_BUFFER_SIZE 512
-#define CDC_TX_BUFFER_SIZE 512
+#define CDC_RX_BUFFER_SIZE 256
+#define CDC_TX_BUFFER_SIZE 256
 
-class CDC : public HardwareSerial
+class CDC_BASE : public HardwareSerial
 {
 public:
-    CDC(struct _stm32l4_usbd_cdc_t *usbd_cdc, bool serialEvent);
     void begin(unsigned long baudRate);
     void begin(unsigned long baudrate, uint16_t config);
     void end(void);
@@ -110,8 +164,8 @@ public:
     // STM32L4 EXTENSTION: enable/disabe blocking writes
     void blockOnOverrun(bool enable);
 
-private:
-    struct _stm32l4_usbd_cdc_t *_usbd_cdc;
+protected:
+    struct  _stm32l4_usbd_cdc_t _usbd_cdc;
     bool _blocking;
     uint8_t _rx_data[CDC_RX_BUFFER_SIZE];
     uint8_t _tx_data[CDC_TX_BUFFER_SIZE];
@@ -132,6 +186,19 @@ private:
     void EventCallback(uint32_t events);
 };
 
+class CDC : public CDC_BASE {
+public:
+  explicit CDC(bool serialEvent);
+};
+
+extern CDC Serial;
+
+class WEBUSB : public CDC_BASE {
+public:
+  WEBUSB();
+};
+
+extern WEBUSB WebUSBSerial;
 
 #define MOUSE_LEFT 1
 #define MOUSE_RIGHT 2

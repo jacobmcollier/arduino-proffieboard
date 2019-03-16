@@ -2390,7 +2390,8 @@ extern void stm32l4_gpio_pin_configure(unsigned int pin, unsigned int mode);
 extern void stm32l4_gpio_pin_input(unsigned int pin);
 extern void stm32l4_gpio_pin_output(unsigned int pin);
 extern void stm32l4_gpio_pin_alternate(unsigned int pin);
-
+extern void stm32l4_gpio_pin_standby_pushpull(unsigned int pin, int mode);
+   
 #ifdef __cplusplus
 }
 #endif

@@ -21,6 +21,7 @@ INCLUDES = \
 	-I../../../system/STM32L4xx/Source/USB/Class/CDC/Inc \
 	-I../../../system/STM32L4xx/Source/USB/Class/MSC/Inc \
 	-I../../../system/STM32L4xx/Source/USB/Class/HID/Inc \
+	-I../../../system/STM32L4xx/Source/USB/Class/WEBUSB/Inc \
 	-I../../../system/STM32L4xx/Source/USB \
 	-I../../../system/STM32L4xx/Include \
 	-I. 
@@ -31,6 +32,7 @@ LSRCS = \
 	./DAP/DAP.c \
 	./DAP/SW_DP.c \
 	./USB/Class/CDC/Src/usbd_cdc.c \
+	./USB/Class/WEBUSB/Src/usbd_webusb.c \
 	./USB/Class/MSC/Src/usbd_msc.c \
 	./USB/Class/MSC/Src/usbd_msc_bot.c \
 	./USB/Class/MSC/Src/usbd_msc_data.c \

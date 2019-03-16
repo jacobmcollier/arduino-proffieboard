@@ -32,33 +32,6 @@
 
 #if defined(USBCON)
 
-#define USB_TYPE_NONE        0
-#define USB_TYPE_CDC         1
-#define USB_TYPE_CDC_MSC     2
-#define USB_TYPE_CDC_HID     3
-#define USB_TYPE_CDC_MSC_HID 4
-#define USB_TYPE_CDC_DAP     5
-#define USB_TYPE_CDC_MSC_DAP 6
-
-#if (USB_TYPE == USB_TYPE_CDC)
-#define USB_CLASS USBD_CDC_Initialize
-#endif
-#if (USB_TYPE == USB_TYPE_CDC_MSC)
-#define USB_CLASS USBD_CDC_MSC_Initialize
-#endif
-#if (USB_TYPE == USB_TYPE_CDC_HID)
-#define USB_CLASS USBD_CDC_HID_Initialize
-#endif
-#if (USB_TYPE == USB_TYPE_CDC_MSC_HID)
-#define USB_CLASS USBD_CDC_MSC_HID_Initialize
-#endif
-#if (USB_TYPE == USB_TYPE_CDC_DAP)
-#define USB_CLASS USBD_CDC_DAP_Initialize
-#endif
-#if (USB_TYPE == USB_TYPE_CDC_MSC_DAP)
-#define USB_CLASS USBD_CDC_MSC_DAP_Initialize
-#endif
-
 void USBDeviceClass::init()
 {
 #if defined(USB_CLASS)

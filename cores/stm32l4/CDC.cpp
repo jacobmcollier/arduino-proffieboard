@@ -38,8 +38,6 @@
 // Don't allow blocking when serial is not connected.
 #define SHOULD_BLOCK() (_blocking && __get_IPSR() == 0 && this->operator bool())
 
-stm32l4_usbd_cdc_t stm32l4_usbd_cdc;
-
 extern int (*stm32l4_stdio_put)(char, FILE*);
 
 static int serialusb_stdio_put(char data, FILE *fp)
@@ -47,10 +45,8 @@ static int serialusb_stdio_put(char data, FILE *fp)
     return Serial.write(&data, 1);
 }
 
-CDC::CDC(struct _stm32l4_usbd_cdc_t *usbd_cdc, bool serialEvent)
+CDC::CDC(bool serialEvent)
 {
-    _usbd_cdc = usbd_cdc;
-
     _blocking = true;
 
     _tx_read = 0;
@@ -66,24 +62,44 @@ CDC::CDC(struct _stm32l4_usbd_cdc_t *usbd_cdc, bool serialEvent)
     _completionCallback = NULL;
     _receiveCallback = NULL;
 
-    stm32l4_usbd_cdc_create(usbd_cdc);
+    stm32l4_usbd_cdc_create(&_usbd_cdc);
 
     if (serialEvent) {
 	serialEventCallback = serialEventDispatch;
     }
 }
 
-void CDC::begin(unsigned long baudrate)
+WEBUSB::WEBUSB()
+{
+    _blocking = true;
+
+    _tx_read = 0;
+    _tx_write = 0;
+    _tx_count = 0;
+    _tx_size = 0;
+
+    _tx_data2 = NULL;
+    _tx_size2 = 0;
+
+    _tx_timeout = 0;
+  
+    _completionCallback = NULL;
+    _receiveCallback = NULL;
+
+    stm32l4_usbd_cdc_create_webusb(&_usbd_cdc);
+}
+
+void CDC_BASE::begin(unsigned long baudrate)
 {
     begin(baudrate, (uint8_t)SERIAL_8N1);
 }
 
-void CDC::begin(unsigned long baudrate, uint16_t config)
+void CDC_BASE::begin(unsigned long baudrate, uint16_t config)
 {
     /* If USBD_CDC has already been enabled/initialized by STDIO, just add the notify.
      */
-    if (_usbd_cdc->state == USBD_CDC_STATE_INIT) {
-        stm32l4_usbd_cdc_enable(_usbd_cdc, &_rx_data[0], sizeof(_rx_data), 0, CDC::_event_callback, (void*)this, (USBD_CDC_EVENT_SOF | USBD_CDC_EVENT_RECEIVE | USBD_CDC_EVENT_TRANSMIT));
+    if (_usbd_cdc.state == USBD_CDC_STATE_INIT) {
+        stm32l4_usbd_cdc_enable(&_usbd_cdc, &_rx_data[0], sizeof(_rx_data), 0, CDC_BASE::_event_callback, (void*)this, (USBD_CDC_EVENT_SOF | USBD_CDC_EVENT_RECEIVE | USBD_CDC_EVENT_TRANSMIT));
 
 	if (stm32l4_stdio_put == NULL) {
 	    stm32l4_stdio_put = serialusb_stdio_put;
@@ -91,11 +107,11 @@ void CDC::begin(unsigned long baudrate, uint16_t config)
     } else {
 	flush();
 
-	stm32l4_usbd_cdc_notify(_usbd_cdc, CDC::_event_callback, (void*)this, (USBD_CDC_EVENT_SOF | USBD_CDC_EVENT_RECEIVE | USBD_CDC_EVENT_TRANSMIT));
+	stm32l4_usbd_cdc_notify(&_usbd_cdc, CDC_BASE::_event_callback, (void*)this, (USBD_CDC_EVENT_SOF | USBD_CDC_EVENT_RECEIVE | USBD_CDC_EVENT_TRANSMIT));
     }
 }
 
-void CDC::end()
+void CDC_BASE::end()
 {
     flush();
 
@@ -103,17 +119,17 @@ void CDC::end()
 	stm32l4_stdio_put = NULL;
     }
 
-    stm32l4_usbd_cdc_disable(_usbd_cdc);
+    stm32l4_usbd_cdc_disable(&_usbd_cdc);
 }
 
-int CDC::available()
+int CDC_BASE::available()
 {
-    return stm32l4_usbd_cdc_count(_usbd_cdc);
+    return stm32l4_usbd_cdc_count(&_usbd_cdc);
 }
 
-int CDC::availableForWrite(void)
+int CDC_BASE::availableForWrite(void)
 {
-    if (_usbd_cdc->state != USBD_CDC_STATE_READY) {
+    if (_usbd_cdc.state != USBD_CDC_STATE_READY) {
 	return 0;
     }
 
@@ -124,53 +140,53 @@ int CDC::availableForWrite(void)
     return CDC_TX_BUFFER_SIZE - _tx_count;
 }
 
-int CDC::peek()
+int CDC_BASE::peek()
 {
-    return stm32l4_usbd_cdc_peek(_usbd_cdc);
+    return stm32l4_usbd_cdc_peek(&_usbd_cdc);
 }
 
-int CDC::read()
+int CDC_BASE::read()
 {
     uint8_t data;
 
-    if (!stm32l4_usbd_cdc_count(_usbd_cdc)) {
+    if (!stm32l4_usbd_cdc_count(&_usbd_cdc)) {
 	return -1;
     }
 
-    stm32l4_usbd_cdc_receive(_usbd_cdc, &data, 1);
+    stm32l4_usbd_cdc_receive(&_usbd_cdc, &data, 1);
 
     return data;
 }
 
-size_t CDC::read(uint8_t *buffer, size_t size)
+size_t CDC_BASE::read(uint8_t *buffer, size_t size)
 {
-    return stm32l4_usbd_cdc_receive(_usbd_cdc, buffer, size);
+    return stm32l4_usbd_cdc_receive(&_usbd_cdc, buffer, size);
 }
 
-void CDC::flush()
+void CDC_BASE::flush()
 {
     if (armv7m_core_priority() <= STM32L4_USB_IRQ_PRIORITY) {
-	while ((_tx_count != 0) || (_tx_size2 != 0) || !stm32l4_usbd_cdc_done(_usbd_cdc)) {
-	    stm32l4_usbd_cdc_poll(_usbd_cdc);
+	while ((_tx_count != 0) || (_tx_size2 != 0) || !stm32l4_usbd_cdc_done(&_usbd_cdc)) {
+	    stm32l4_usbd_cdc_poll(&_usbd_cdc);
 	}
     } else {
-	while ((_tx_count != 0) || (_tx_size2 != 0) || !stm32l4_usbd_cdc_done(_usbd_cdc)) {
+	while ((_tx_count != 0) || (_tx_size2 != 0) || !stm32l4_usbd_cdc_done(&_usbd_cdc)) {
 	    armv7m_core_yield();
 	}
     }
 }
 
-size_t CDC::write(const uint8_t data)
+size_t CDC_BASE::write(const uint8_t data)
 {
     return write(&data, 1);
 }
 
-size_t CDC::write(const uint8_t *buffer, size_t size)
+size_t CDC_BASE::write(const uint8_t *buffer, size_t size)
 {
     unsigned int tx_read, tx_write, tx_count, tx_size;
     size_t count;
 
-    if (_usbd_cdc->state != USBD_CDC_STATE_READY) {
+    if (_usbd_cdc.state != USBD_CDC_STATE_READY) {
 	return 0;
     }
 
@@ -200,7 +216,7 @@ size_t CDC::write(const uint8_t *buffer, size_t size)
 		break;
 	    }
 
-	    if (stm32l4_usbd_cdc_done(_usbd_cdc)) {
+	    if (stm32l4_usbd_cdc_done(&_usbd_cdc)) {
 		tx_size = _tx_count;
 		tx_read = _tx_read;
 
@@ -214,7 +230,7 @@ size_t CDC::write(const uint8_t *buffer, size_t size)
 		
 		_tx_size = tx_size;
 		
-		if (!stm32l4_usbd_cdc_transmit(_usbd_cdc, &_tx_data[tx_read], tx_size)) {
+		if (!stm32l4_usbd_cdc_transmit(&_usbd_cdc, &_tx_data[tx_read], tx_size)) {
 		    _tx_size = 0;
 		    _tx_count = 0;
 		    _tx_read = _tx_write;
@@ -246,7 +262,7 @@ size_t CDC::write(const uint8_t *buffer, size_t size)
 	armv7m_atomic_add(&_tx_count, tx_count);
     }
 
-    if (stm32l4_usbd_cdc_done(_usbd_cdc)) {
+    if (stm32l4_usbd_cdc_done(&_usbd_cdc)) {
 	tx_size = _tx_count;
 	tx_read = _tx_read;
 	
@@ -261,7 +277,7 @@ size_t CDC::write(const uint8_t *buffer, size_t size)
 	    
 	    _tx_size = tx_size;
 	    
-	    if (!stm32l4_usbd_cdc_transmit(_usbd_cdc, &_tx_data[tx_read], tx_size)) {
+	    if (!stm32l4_usbd_cdc_transmit(&_usbd_cdc, &_tx_data[tx_read], tx_size)) {
 		_tx_size = 0;
 		_tx_count = 0;
 		_tx_read = _tx_write;
@@ -272,9 +288,9 @@ size_t CDC::write(const uint8_t *buffer, size_t size)
     return count;
 }
 
-bool CDC::write(const uint8_t *buffer, size_t size, void(*callback)(void))
+bool CDC_BASE::write(const uint8_t *buffer, size_t size, void(*callback)(void))
 {
-    if (_usbd_cdc->state != USBD_CDC_STATE_READY) {
+    if (_usbd_cdc.state != USBD_CDC_STATE_READY) {
 	return false;
     }
 
@@ -290,8 +306,8 @@ bool CDC::write(const uint8_t *buffer, size_t size, void(*callback)(void))
     _tx_data2 = buffer;
     _tx_size2 = size;
 
-    if (stm32l4_usbd_cdc_done(_usbd_cdc)) {
-	if (!stm32l4_usbd_cdc_transmit(_usbd_cdc, _tx_data2, _tx_size2)) {
+    if (stm32l4_usbd_cdc_done(&_usbd_cdc)) {
+	if (!stm32l4_usbd_cdc_transmit(&_usbd_cdc, _tx_data2, _tx_size2)) {
 	    _tx_data2 = NULL;
 	    _tx_size2 = 0;
 	}
@@ -300,7 +316,7 @@ bool CDC::write(const uint8_t *buffer, size_t size, void(*callback)(void))
     return true;
 }
 
-bool CDC::done()
+bool CDC_BASE::done()
 {
     if (_tx_count) {
 	return false;
@@ -310,24 +326,24 @@ bool CDC::done()
 	return false;
     }
 
-    if (!stm32l4_usbd_cdc_done(_usbd_cdc)) {
+    if (!stm32l4_usbd_cdc_done(&_usbd_cdc)) {
 	return false;
     }
 
     return true;
 }
 
-void CDC::onReceive(void(*callback)(void))
+void CDC_BASE::onReceive(void(*callback)(void))
 {
     _receiveCallback = callback;
 }
 
-void CDC::blockOnOverrun(bool block)
+void CDC_BASE::blockOnOverrun(bool block)
 {
     _blocking = block;
 }
 
-void CDC::EventCallback(uint32_t events)
+void CDC_BASE::EventCallback(uint32_t events)
 {
     unsigned int tx_read, tx_size;
 
@@ -350,7 +366,7 @@ void CDC::EventCallback(uint32_t events)
       
 	    _tx_size = 0;
 
-	    if (_usbd_cdc->state == USBD_CDC_STATE_READY) {
+	    if (_usbd_cdc.state == USBD_CDC_STATE_READY) {
 		if (_tx_count != 0) {
 		    tx_size = _tx_count;
 		    tx_read = _tx_read;
@@ -365,10 +381,10 @@ void CDC::EventCallback(uint32_t events)
 		    
 		    _tx_size = tx_size;
 		    
-		    stm32l4_usbd_cdc_transmit(_usbd_cdc, &_tx_data[tx_read], tx_size);
+		    stm32l4_usbd_cdc_transmit(&_usbd_cdc, &_tx_data[tx_read], tx_size);
 		} else {
 		    if (_tx_size2 != 0) {
-			stm32l4_usbd_cdc_transmit(_usbd_cdc, _tx_data2, _tx_size2);
+			stm32l4_usbd_cdc_transmit(&_usbd_cdc, _tx_data2, _tx_size2);
 		    }
 		}
 	    } else {
@@ -408,57 +424,61 @@ void CDC::EventCallback(uint32_t events)
 	    
 		_tx_size = tx_size;
 	    
-		stm32l4_usbd_cdc_transmit(_usbd_cdc, &_tx_data[tx_read], tx_size);
+		stm32l4_usbd_cdc_transmit(&_usbd_cdc, &_tx_data[tx_read], tx_size);
 	    }
 	}
     }
 }
 
-void CDC::_event_callback(void *context, uint32_t events)
+void CDC_BASE::_event_callback(void *context, uint32_t events)
 {
     reinterpret_cast<class CDC*>(context)->EventCallback(events);
 }
 
-CDC::operator bool()
+CDC_BASE::operator bool()
 {
-    return (_usbd_cdc->state == USBD_CDC_STATE_READY) && (stm32l4_usbd_cdc_info.lineState & 1);
+    return (_usbd_cdc.state == USBD_CDC_STATE_READY) && (stm32l4_usbd_cdc_info(&_usbd_cdc)->lineState & 1);
 }
 
-unsigned long CDC::baud()
+unsigned long CDC_BASE::baud()
 {
-    return stm32l4_usbd_cdc_info.dwDTERate;
+    return stm32l4_usbd_cdc_info(&_usbd_cdc)->dwDTERate;
 }
 
-uint8_t CDC::stopbits()
+uint8_t CDC_BASE::stopbits()
 {
-    return stm32l4_usbd_cdc_info.bCharFormat;
+    return stm32l4_usbd_cdc_info(&_usbd_cdc)->bCharFormat;
 }
 
-uint8_t CDC::paritytype()
+uint8_t CDC_BASE::paritytype()
 {
-    return stm32l4_usbd_cdc_info.bParityType;
+    return stm32l4_usbd_cdc_info(&_usbd_cdc)->bParityType;
 }
 
-uint8_t CDC::numbits()
+uint8_t CDC_BASE::numbits()
 {
-    return stm32l4_usbd_cdc_info.bDataBits;
+    return stm32l4_usbd_cdc_info(&_usbd_cdc)->bDataBits;
 }
 
-bool CDC::dtr()
+bool CDC_BASE::dtr()
 {
-    return stm32l4_usbd_cdc_info.lineState & 1;
+    return stm32l4_usbd_cdc_info(&_usbd_cdc)->lineState & 1;
 }
 
-bool CDC::rts() 
+bool CDC_BASE::rts() 
 {
-    return stm32l4_usbd_cdc_info.lineState & 2;
+    return stm32l4_usbd_cdc_info(&_usbd_cdc)->lineState & 2;
 }
 
 extern void serialEvent() __attribute__((weak));
 
 bool Serial_empty() { return !Serial.available(); }
 
-CDC Serial(&stm32l4_usbd_cdc, (serialEvent != NULL));
+CDC Serial((serialEvent != NULL));
+
+#ifdef USB_CLASS_WEBUSB
+WEBUSB WebUSBSerial;
+#endif
 
 #endif /* USBCON */
 

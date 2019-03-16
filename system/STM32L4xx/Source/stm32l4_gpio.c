@@ -117,3 +117,16 @@ void stm32l4_gpio_pin_alternate(unsigned int pin)
 
     armv7m_atomic_modify(&GPIO->MODER, (0x00000003 << (index << 1)), ((GPIO_MODE_ALTERNATE >> GPIO_MODE_SHIFT) << (index << 1)));
 }
+
+void stm32l4_gpio_pin_standby_pushpull(unsigned int pin, int mode) {
+  uint32_t group = (pin >> 4) & 7;
+  uint32_t index = (pin >> 0) & 15;
+  volatile uint32_t *up = &PWR->PUCRA + (&PWR->PUCRB - &PWR->PUCRA) * group;
+  volatile uint32_t *down = &PWR->PDCRA + (&PWR->PDCRB - &PWR->PDCRA) * group;
+  
+  RCC->APB1ENR1 |= RCC_APB1ENR1_PWREN;
+  PWR->CR3 |= PWR_CR3_APC;
+  armv7m_atomic_modify(up, 1 << index, (mode & GPIO_PUPD_PULLUP) ? (1 << index) : 0);
+  armv7m_atomic_modify(down, 1 << index, (mode & GPIO_PUPD_PULLDOWN) ? (1 << index) : 0);
+}
+

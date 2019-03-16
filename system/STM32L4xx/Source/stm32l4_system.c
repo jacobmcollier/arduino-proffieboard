@@ -2524,6 +2524,7 @@ static void stm32l4_system_deepsleep(uint32_t lpms, uint32_t config, uint32_t ti
 
     PWR->CR1 = (PWR->CR1 & ~PWR_CR1_LPMS) | lpms;
     PWR->CR3 = (PWR->CR3 & ~PWR_CR3_EWUP) | ((config >> 0) & PWR_CR3_EWUP) | PWR_CR3_EIWF;
+	
     PWR->CR4 = (PWR->CR4 & ~(PWR_CR4_WP1 | PWR_CR4_WP2 | PWR_CR4_WP3 | PWR_CR4_WP4 | PWR_CR4_WP5)) | ((config >> 8) & (PWR_CR4_WP1 | PWR_CR4_WP2 | PWR_CR4_WP3 | PWR_CR4_WP4 | PWR_CR4_WP5));
 
     SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;

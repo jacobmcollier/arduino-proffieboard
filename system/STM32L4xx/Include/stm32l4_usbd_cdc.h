@@ -52,8 +52,6 @@ typedef struct _stm32l4_usbd_cdc_info_t {
     volatile uint8_t               lineState;
 } stm32l4_usbd_cdc_info_t;
 
-extern volatile stm32l4_usbd_cdc_info_t stm32l4_usbd_cdc_info;
-
 #define USBD_CDC_EVENT_SOF               0x20000000
 #define USBD_CDC_EVENT_RECEIVE           0x40000000
 #define USBD_CDC_EVENT_TRANSMIT          0x80000000
@@ -78,9 +76,11 @@ typedef struct _stm32l4_usbd_cdc_t {
     uint16_t                       rx_write;
     volatile uint16_t              rx_wrap;
     volatile uint32_t              rx_count;
+    void *device;
 } stm32l4_usbd_cdc_t;
 
 extern bool stm32l4_usbd_cdc_create(stm32l4_usbd_cdc_t *usbd_cdc);
+extern bool stm32l4_usbd_cdc_create_webusb(stm32l4_usbd_cdc_t *usbd_cdc);
 extern bool stm32l4_usbd_cdc_destroy(stm32l4_usbd_cdc_t *usbd_cdc);
 extern bool stm32l4_usbd_cdc_enable(stm32l4_usbd_cdc_t *usbd_cdc, uint8_t *rx_data, uint16_t rx_size, uint32_t option, stm32l4_usbd_cdc_callback_t callback, void *context, uint32_t events);
 extern bool stm32l4_usbd_cdc_disable(stm32l4_usbd_cdc_t *usbd_cdc);
@@ -92,6 +92,7 @@ extern int stm32l4_usbd_cdc_peek(stm32l4_usbd_cdc_t *usbd_cdc);
 extern bool stm32l4_usbd_cdc_transmit(stm32l4_usbd_cdc_t *usbd_cdc, const uint8_t *tx_data, uint32_t tx_count);
 extern bool stm32l4_usbd_cdc_done(stm32l4_usbd_cdc_t *usbd_cdc);
 extern void stm32l4_usbd_cdc_poll(stm32l4_usbd_cdc_t *usbd_cdc);
+extern volatile stm32l4_usbd_cdc_info_t* stm32l4_usbd_cdc_info(stm32l4_usbd_cdc_t *usbd_cdc);
 
 #ifdef __cplusplus
 }

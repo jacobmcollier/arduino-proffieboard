@@ -45,6 +45,10 @@ Proffieboard-L433CC.menu.usb.cdc_dap=Serial + CMSIS-DAP
 Proffieboard-L433CC.menu.usb.cdc_dap.build.usb_type=USB_TYPE_CDC_DAP
 Proffieboard-L433CC.menu.usb.cdc_msc_dap=Serial + Mass Storage + CMSIS-DAP
 Proffieboard-L433CC.menu.usb.cdc_msc_dap.build.usb_type=USB_TYPE_CDC_MSC_DAP
+Proffieboard-L433CC.menu.usb.cdc_webusb=Serial + WebUSB
+Proffieboard-L433CC.menu.usb.cdc_webusb.build.usb_type=USB_TYPE_CDC_WEBUSB
+Proffieboard-L433CC.menu.usb.cdc_msc_webusb=Serial + Mass Storage + WebUSB
+Proffieboard-L433CC.menu.usb.cdc_msc_webusb.build.usb_type=USB_TYPE_CDC_MSC_WEBUSB
 Proffieboard-L433CC.menu.usb.none=No USB
 Proffieboard-L433CC.menu.usb.none.build.usb_type=USB_TYPE_NONE
 

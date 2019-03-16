@@ -40,13 +40,16 @@
 #include "usbd_desc.h"
 #include "usbd_conf.h"
 #include "usbd_ctlreq.h"
+#include "usbd_webusb.h"
 
 #include "stm32l4_gpio.h"
 
 extern USBD_CDC_ItfTypeDef const stm32l4_usbd_cdc_interface;
+extern USBD_CDC_ItfTypeDef const stm32l4_usbd_webusb_interface;
 extern USBD_StorageTypeDef const dosfs_storage_interface;
 extern USBD_HID_ItfTypeDef const stm32l4_usbd_dap_interface;
 extern USBD_HID_ItfTypeDef const stm32l4_usbd_hid_interface;
+extern void USBD_Configure(void);
 
 extern const char *USBD_SuffixString;
 
@@ -161,6 +164,28 @@ static const USBD_ClassTypeDef  USBD_CDC_MSC_CLASS =
 #endif  
 };
 
+/* WEBUSB interface class callbacks structure */
+static const USBD_ClassTypeDef  USBD_WEBUSB_CLASS_Interface = 
+{
+  USBD_WEBUSB_Init,
+  USBD_WEBUSB_DeInit,
+  USBD_WEBUSB_Setup,
+  NULL,                 /* EP0_TxSent, */
+  NULL,                 /* EP0_RxReady */
+  USBD_WEBUSB_DataIn,
+  USBD_WEBUSB_DataOut,
+  NULL,
+  NULL,
+  NULL,     
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+#if (USBD_SUPPORT_USER_STRING == 1)
+  NULL,
+#endif  
+};
+
 static const USBD_ClassTypeDef  USBD_MSC_CLASS_Interface = 
 {
   USBD_MSC_Init,
@@ -205,259 +230,182 @@ static const USBD_ClassTypeDef  USBD_HID_CLASS_Interface =
 
 static const USBD_ClassTypeDef * USBD_MSC_Class_Interface = NULL;
 static const USBD_ClassTypeDef * USBD_HID_Class_Interface = NULL;
+static const USBD_ClassTypeDef * USBD_WEBUSB_Class_Interface = NULL;
 
 static uint16_t USBD_MSC_Interface = 0xffff;
 static uint16_t USBD_HID_Interface = 0xffff;
+static uint16_t USBD_WEBUSB_Interface = 0xffff;
 
 #define USB_CDC_CONFIG_DESC_SIZ   (9+8+(9+5+5+4+5+7)+(9+7+7))
 #define USB_MSC_CONFIG_DESC_SIZ   (9+7+7)
 #define USB_HID_CONFIG_DESC_SIZ   (9+9+7+7)
+#define USB_WEBUSB_CONFIG_DESC_SIZ   (9+7+7)
 
 #define USB_CDC_INTERFACE_CONTROL 0
 #define USB_CDC_INTERFACE_DATA    1
+
 #define USB_CDC_INTERFACE_COUNT   2
-
-#define USB_MSC_INTERFACE         2
 #define USB_MSC_INTERFACE_COUNT   1
-
-#define USB_HID_INTERFACE         3
 #define USB_HID_INTERFACE_COUNT   1
+#define USB_WEBUSB_INTERFACE_COUNT   1
 
 #define USB_CDC_MSC_CONFIG_DESC_SIZ      (USB_CDC_CONFIG_DESC_SIZ + USB_MSC_CONFIG_DESC_SIZ)
 #define USB_CDC_HID_CONFIG_DESC_SIZ      (USB_CDC_CONFIG_DESC_SIZ + USB_HID_CONFIG_DESC_SIZ)
 #define USB_CDC_MSC_HID_CONFIG_DESC_SIZ  (USB_CDC_CONFIG_DESC_SIZ + USB_MSC_CONFIG_DESC_SIZ + USB_HID_CONFIG_DESC_SIZ)
+#define USB_CDC_WEBUSB_CONFIG_DESC_SIZ  (USB_CDC_CONFIG_DESC_SIZ + USB_WEBUSB_CONFIG_DESC_SIZ)
+#define USB_CDC_MSC_WEBUSB_CONFIG_DESC_SIZ  (USB_CDC_CONFIG_DESC_SIZ + USB_MSC_CONFIG_DESC_SIZ + USB_WEBUSB_CONFIG_DESC_SIZ)
 
 #define USB_CDC_MSC_INTERFACE_COUNT      (USB_CDC_INTERFACE_COUNT + USB_MSC_INTERFACE_COUNT)
 #define USB_CDC_HID_INTERFACE_COUNT      (USB_CDC_INTERFACE_COUNT + USB_HID_INTERFACE_COUNT)
 #define USB_CDC_MSC_HID_INTERFACE_COUNT  (USB_CDC_INTERFACE_COUNT + USB_MSC_INTERFACE_COUNT + USB_HID_INTERFACE_COUNT)
+#define USB_CDC_WEBUSB_INTERFACE_COUNT  (USB_CDC_INTERFACE_COUNT + USB_WEBUSB_INTERFACE_COUNT)
+#define USB_CDC_MSC_WEBUSB_INTERFACE_COUNT  (USB_CDC_INTERFACE_COUNT + USB_MSC_INTERFACE_COUNT + USB_WEBUSB_INTERFACE_COUNT)
+
+
+#define USB_WORD(X) LOBYTE(X), HIBYTE(X)
+#define USB_ENDPOINT(EP, ATTR, MAX_PACKET_SIZE, INTERVAL)		\
+  0x07,                                                        /* bLength */ \
+  0x05,                                                        /* bDescriptorType */ \
+  EP,                                                          /* bEndpointAddress */ \
+  ATTR,                                                        /* bmAttributes */ \
+  USB_WORD(MAX_PACKET_SIZE),                                   /* wMaxPacketSize */ \
+  INTERVAL                                                     /* bInterval */
+
+#define USB_INTERFACE(INTERFACE_NUMBER, NUM_ENDPOINTS, INTERFACE_CLASS, INTERFACE_SUBCLASS, INTERFACE_PROTOCOL, iINTERFACE) \
+  0x09,                                                        /* bLength */ \
+  0x04,                                                        /* bDescriptorType */ \
+  INTERFACE_NUMBER,                                            /* bInterfaceNumber */ \
+  0x00,                                                        /* bAlternateSetting */ \
+  NUM_ENDPOINTS,                                               /* bNumEndpoints */ \
+  INTERFACE_CLASS,                                             /* bInterfaceClass */ \
+  INTERFACE_SUBCLASS,                                          /* bInterfaceSubClass */	\
+  INTERFACE_PROTOCOL,                                          /* bInterfaceProtocol */	\
+  iINTERFACE                                                   /* iInterface */
+
+
+#define CDC_CONTROL_INTERFACE_DATA(INTERFACE_NUM)			\
+  /**** CDC Control Interface ****/					\
+  USB_INTERFACE(INTERFACE_NUM, 0x01,  0x02,0x02,0x01, 0x05),		\
+									\
+  /**** CDC Header ****/						\
+  0x05,                                                        /* bLength */ \
+  0x24,                                                        /* bDescriptorType */ \
+  0x00,                                                        /* bDescriptorSubtype */	\
+  0x10,                                                        /* bcdCDC */ \
+  0x01,									\
+									\
+  /**** CDC Call Management ****/					\
+  0x05,                                                        /* bFunctionLength */ \
+  0x24,                                                        /* bDescriptorType */ \
+  0x01,                                                        /* bDescriptorSubtype */	\
+  0x00,                                                        /* bmCapabilities */ \
+  0x01,                                                        /* bDataInterface */ \
+									\
+  /**** CDC ACM ****/							\
+  0x04,                                                        /* bFunctionLength */ \
+  0x24,                                                        /* bDescriptorType */ \
+  0x02,                                                        /* bDescriptorSubtype */	\
+  0x02,                                                        /* bmCapabilities */ \
+									\
+  /**** CDC Union ****/							\
+  0x05,                                                        /* bFunctionLength */ \
+  0x24,                                                        /* bDescriptorType */ \
+  0x06,                                                        /* bDescriptorSubtype */	\
+  0x00,                                                        /* bMasterInterface */ \
+  0x01,                                                        /* bSlaveInterface0 */ \
+									\
+  /**** CDC Control Endpoint Descriptor ****/				\
+  USB_ENDPOINT(CDC_CMD_EP, 0x03, CDC_CMD_PACKET_SIZE, 0xff)
+
+
+#define CDC_DATA_INTERFACE_DATA(INTERFACE_NUM)				\
+  /**** CDC Data Interface ****/					\
+  USB_INTERFACE(INTERFACE_NUM, 0x02,  0x0a,0x00,0x00,  0x06),		\
+									\
+  /**** CDC Data Endpoint IN ****/					\
+  USB_ENDPOINT(CDC_IN_EP, 0x02, CDC_DATA_FS_MAX_PACKET_SIZE, 0x00),	\
+									\
+  /**** CDC Data Endpoint OUT ****/					\
+  USB_ENDPOINT(CDC_OUT_EP, 0x02, CDC_DATA_FS_MAX_PACKET_SIZE, 0x00)
+
+#define MSC_INTERFACE_DATA(INTERFACE_NUM)				\
+  /**** MSC Interface ****/					\
+  USB_INTERFACE(INTERFACE_NUM, 0x02, 0x08,0x06,0x50, 0x07),	\
+								\
+  /**** MSC Endpoint IN ****/					\
+  USB_ENDPOINT(MSC_EPIN_ADDR, 0x02, MSC_MAX_FS_PACKET, 0x00),	\
+								\
+  /**** MSC Endpoint OUT ****/					\
+  USB_ENDPOINT(MSC_EPOUT_ADDR, 0x02, MSC_MAX_FS_PACKET, 0x00)
+
+#define HID_INTERFACE_DATA(INTERFACE_NUM)				\
+  /**** HID Interface ****/						\
+  USB_INTERFACE(0x02, 0x02, 0x03,0x00,0x00, 0x09),			\
+									\
+  /**** HID Descriptor ****/						\
+  0x09,                                                        /* bLength */ \
+  0x21,                                                        /* bDescriptorType */ \
+  0x11,                                                        /* bcdHID */ \
+  0x01,									\
+  0x00,                                                        /* bCountryCode */ \
+  0x01,                                                        /* bNumDescriptors */ \
+  0x22,                                                        /* bDescriptorType */ \
+  USB_WORD(USB_HID_REPORT_DESC_SIZ),                             /* wItemLength */ \
+									\
+  /**** HID Endpoint IN ****/						\
+  USB_ENDPOINT(HID_EPIN_ADDR, 0x03, HID_EPIN_SIZE, 0x01),		\
+									\
+  /**** HID Endpoint OUT ****/						\
+    USB_ENDPOINT(HID_EPOUT_ADDR, 0x03, HID_EPOUT_SIZE, 0x01)
+
+#define WEBUSB_INTERFACE_DATA(INTERFACE_NUM)				\
+  /**** CDC Data Interface ****/					\
+  USB_INTERFACE(INTERFACE_NUM, 0x02,  0xff,0x00,0x00,  0x06),		\
+									\
+  /**** CDC Data Endpoint IN ****/					\
+  USB_ENDPOINT(WEBUSB_IN_EP, 0x02, CDC_DATA_FS_MAX_PACKET_SIZE, 0x00),		\
+									\
+  /**** CDC Data Endpoint OUT ****/					\
+  USB_ENDPOINT(WEBUSB_OUT_EP, 0x02, CDC_DATA_FS_MAX_PACKET_SIZE, 0x00)
+
+
+#define CDC_INTERFACES_DATA(INTERFACE_NUM)				\
+  /**** IAD to associate the two CDC interfaces ****/			\
+  0x08,                                                        /* bLength */ \
+  0x0b,                                                        /* bDescriptorType */ \
+  0x00,                                                        /* bFirstInterface */ \
+  0x02,                                                        /* bInterfaceCount */ \
+  0x02,                                                        /* bFunctionClass */ \
+  0x02,                                                        /* bFunctionSubClass */ \
+  0x01,                                                        /* bFunctionProtocol */ \
+  0x04,                                                        /* iFunction */ \
+									\
+  CDC_CONTROL_INTERFACE_DATA(INTERFACE_NUM),				\
+  CDC_DATA_INTERFACE_DATA(INTERFACE_NUM + 1)
+
+#define CONFIG_DESCRIPTOR_DATA(SIZE, INTERFACES)			\
+  /**** Configuration Descriptor ****/					\
+  0x09,                                                        /* bLength */ \
+  0x02,                                                        /* bDescriptorType */ \
+  USB_WORD(SIZE),                                              /* wTotalLength */ \
+  INTERFACES,                                                  /* bNumInterfaces */ \
+  0x01,                                                        /* bConfigurationValue */ \
+  0x00,                                                        /* iConfiguration */ \
+  0x80,                                                        /* bmAttributes */ \
+  0x32                                                         /* bMaxPower */
+
 
 static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_1[USB_CDC_CONFIG_DESC_SIZ] =
 {
-  /**** Configuration Descriptor ****/
-  0x09,                                                        /* bLength */
-  0x02,                                                        /* bDescriptorType */
-  LOBYTE(USB_CDC_CONFIG_DESC_SIZ),                             /* wTotalLength */
-  HIBYTE(USB_CDC_CONFIG_DESC_SIZ),
-  0x02,                                                        /* bNumInterfaces */
-  0x01,                                                        /* bConfigurationValue */
-  0x00,                                                        /* iConfiguration */
-  0x80,                                                        /* bmAttributes */
-  0x32,                                                        /* bMaxPower */
-
-  /**** IAD to associate the two CDC interfaces ****/
-  0x08,                                                        /* bLength */
-  0x0b,                                                        /* bDescriptorType */
-  0x00,                                                        /* bFirstInterface */
-  0x02,                                                        /* bInterfaceCount */
-  0x02,                                                        /* bFunctionClass */
-  0x02,                                                        /* bFunctionSubClass */
-  0x01,                                                        /* bFunctionProtocol */
-  0x04,                                                        /* iFunction */
-
-  /**** CDC Control Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x00,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x01,                                                        /* bNumEndpoints */
-  0x02,                                                        /* bInterfaceClass */
-  0x02,                                                        /* bInterfaceSubClass */
-  0x01,                                                        /* bInterfaceProtocol */
-  0x05,                                                        /* iInterface */
-  
-  /**** CDC Header ****/
-  0x05,                                                        /* bLength */
-  0x24,                                                        /* bDescriptorType */
-  0x00,                                                        /* bDescriptorSubtype */
-  0x10,                                                        /* bcdCDC */
-  0x01,
-  
-  /**** CDC Call Management ****/
-  0x05,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x01,                                                        /* bDescriptorSubtype */
-  0x00,                                                        /* bmCapabilities */
-  0x01,                                                        /* bDataInterface */
-  
-  /**** CDC ACM ****/
-  0x04,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x02,                                                        /* bDescriptorSubtype */
-  0x02,                                                        /* bmCapabilities */
-  
-  /**** CDC Union ****/
-  0x05,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x06,                                                        /* bDescriptorSubtype */
-  0x00,                                                        /* bMasterInterface */
-  0x01,                                                        /* bSlaveInterface0 */
-  
-  /**** CDC Control Endpoint Descriptor ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_CMD_EP,                                                  /* bEndpointAddress */
-  0x03,                                                        /* bmAttributes */
-  LOBYTE(CDC_CMD_PACKET_SIZE),                                 /* wMaxPacketSize */
-  HIBYTE(CDC_CMD_PACKET_SIZE),
-  0xff,                                                        /* bInterval */ 
-
-  /**** CDC Data Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x01,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x02,                                                        /* bNumEndpoints */
-  0x0a,                                                        /* bInterfaceClass */
-  0x00,                                                        /* bInterfaceSubClass */
-  0x00,                                                        /* bInterfaceProtocol */
-  0x06,                                                        /* iInterface */
-
-  /**** CDC Data Endpoint IN ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_IN_EP,                                                   /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),                         /* wMaxPacketSize */
-  HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
-  0x00,                                                        /* bInterval */
-
-  /**** CDC Data Endpoint OUT ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_OUT_EP,                                                  /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),                         /* wMaxPacketSize */
-  HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
-  0x00,                                                        /* bInterval */
+  CONFIG_DESCRIPTOR_DATA(USB_CDC_CONFIG_DESC_SIZ, 2),
+  CDC_INTERFACES_DATA(0),
 };
 
 static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_2[USB_CDC_MSC_CONFIG_DESC_SIZ] =
 {
-  /**** Configuration Descriptor ****/
-  0x09,                                                        /* bLength */
-  0x02,                                                        /* bDescriptorType */
-  LOBYTE((USB_CDC_MSC_CONFIG_DESC_SIZ)),                       /* wTotalLength */
-  HIBYTE((USB_CDC_MSC_CONFIG_DESC_SIZ)),
-  0x03,                                                        /* bNumInterfaces */
-  0x01,                                                        /* bConfigurationValue */
-  0x00,                                                        /* iConfiguration */
-  0x80,                                                        /* bmAttributes */
-  0x32,                                                        /* bMaxPower */
-
-  /**** IAD to associate the two CDC interfaces ****/
-  0x08,                                                        /* bLength */
-  0x0b,                                                        /* bDescriptorType */
-  0x00,                                                        /* bFirstInterface */
-  0x02,                                                        /* bInterfaceCount */
-  0x02,                                                        /* bFunctionClass */
-  0x02,                                                        /* bFunctionSubClass */
-  0x01,                                                        /* bFunctionProtocol */
-  0x04,                                                        /* iFunction */
-
-  /**** CDC Control Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x00,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x01,                                                        /* bNumEndpoints */
-  0x02,                                                        /* bInterfaceClass */
-  0x02,                                                        /* bInterfaceSubClass */
-  0x01,                                                        /* bInterfaceProtocol */
-  0x05,                                                        /* iInterface */
-  
-  /**** CDC Header ****/
-  0x05,                                                        /* bLength */
-  0x24,                                                        /* bDescriptorType */
-  0x00,                                                        /* bDescriptorSubtype */
-  0x10,                                                        /* bcdCDC */
-  0x01,
-  
-  /**** CDC Call Management ****/
-  0x05,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x01,                                                        /* bDescriptorSubtype */
-  0x00,                                                        /* bmCapabilities */
-  0x01,                                                        /* bDataInterface */
-  
-  /**** CDC ACM ****/
-  0x04,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x02,                                                        /* bDescriptorSubtype */
-  0x02,                                                        /* bmCapabilities */
-  
-  /**** CDC Union ****/
-  0x05,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x06,                                                        /* bDescriptorSubtype */
-  0x00,                                                        /* bMasterInterface */
-  0x01,                                                        /* bSlaveInterface0 */
-  
-  /**** CDC Control Endpoint ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_CMD_EP,                                                  /* bEndpointAddress */
-  0x03,                                                        /* bmAttributes */
-  LOBYTE(CDC_CMD_PACKET_SIZE),                                 /* wMaxPacketSize */
-  HIBYTE(CDC_CMD_PACKET_SIZE),
-  0xff,                                                        /* bInterval */ 
-
-  /**** CDC Data Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x01,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x02,                                                        /* bNumEndpoints */
-  0x0a,                                                        /* bInterfaceClass */
-  0x00,                                                        /* bInterfaceSubClass */
-  0x00,                                                        /* bInterfaceProtocol */
-  0x06,                                                        /* iInterface */
-
-  /**** CDC Control Endpoint IN ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_IN_EP,                                                   /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),                         /* wMaxPacketSize */
-  HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
-  0x00,                                                        /* bInterval */
-
-  /**** CDC Control Endpoint OUT ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_OUT_EP,                                                  /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),                         /* wMaxPacketSize */
-  HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
-  0x00,                                                        /* bInterval */
-
-  /**** MSC Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x02,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x02,                                                        /* bNumEndpoints */
-  0x08,                                                        /* bInterfaceClass */
-  0x06,                                                        /* bInterfaceSubClass */
-  0x50,                                                        /* nInterfaceProtocol */
-  0x07,                                                        /* iInterface */
-
-  /**** MSC Endpoint IN ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  MSC_EPIN_ADDR,                                               /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(MSC_MAX_FS_PACKET),                                   /* wMaxPacketSize */
-  HIBYTE(MSC_MAX_FS_PACKET),
-  0x00,                                                        /* bInterval */
-
-  /**** MSC Endpoint OUT ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  MSC_EPOUT_ADDR,                                              /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(MSC_MAX_FS_PACKET),                                   /* wMaxPacketSize */
-  HIBYTE(MSC_MAX_FS_PACKET),
-  0x00,                                                        /* bInterval */
+  CONFIG_DESCRIPTOR_DATA(USB_CDC_MSC_CONFIG_DESC_SIZ, 3),
+  CDC_INTERFACES_DATA(0),
+  MSC_INTERFACE_DATA(2),
 };
 
 #define USB_HID_REPORT_DESC_SIZ 101
@@ -523,311 +471,17 @@ static const uint8_t USBD_HID_ReportDescriptor[USB_HID_REPORT_DESC_SIZ] =
 
 static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_3[USB_CDC_HID_CONFIG_DESC_SIZ] =
 {
-  /**** Configuration Descriptor ****/
-  0x09,                                                        /* bLength */
-  0x02,                                                        /* bDescriptorType */
-  LOBYTE(USB_CDC_HID_CONFIG_DESC_SIZ),                         /* wTotalLength */
-  HIBYTE(USB_CDC_HID_CONFIG_DESC_SIZ),
-  0x03,                                                        /* bNumInterfaces */
-  0x01,                                                        /* bConfigurationValue */
-  0x00,                                                        /* iConfiguration */
-  0x80,                                                        /* bmAttributes */
-  0x32,                                                        /* bMaxPower */
-
-  /**** IAD to associate the two CDC interfaces ****/
-  0x08,                                                        /* bLength */
-  0x0b,                                                        /* bDescriptorType */
-  0x00,                                                        /* bFirstInterface */
-  0x02,                                                        /* bInterfaceCount */
-  0x02,                                                        /* bFunctionClass */
-  0x02,                                                        /* bFunctionSubClass */
-  0x01,                                                        /* bFunctionProtocol */
-  0x04,                                                        /* iFunction */
-
-  /**** CDC Control Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x00,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x01,                                                        /* bNumEndpoints */
-  0x02,                                                        /* bInterfaceClass */
-  0x02,                                                        /* bInterfaceSubClass */
-  0x01,                                                        /* bInterfaceProtocol */
-  0x05,                                                        /* iInterface */
-  
-  /**** CDC Header ****/
-  0x05,                                                        /* bLength */
-  0x24,                                                        /* bDescriptorType */
-  0x00,                                                        /* bDescriptorSubtype */
-  0x10,                                                        /* bcdCDC */
-  0x01,
-  
-  /**** CDC Call Management ****/
-  0x05,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x01,                                                        /* bDescriptorSubtype */
-  0x00,                                                        /* bmCapabilities */
-  0x01,                                                        /* bDataInterface */
-  
-  /**** CDC ACM ****/
-  0x04,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x02,                                                        /* bDescriptorSubtype */
-  0x02,                                                        /* bmCapabilities */
-  
-  /**** CDC Union ****/
-  0x05,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x06,                                                        /* bDescriptorSubtype */
-  0x00,                                                        /* bMasterInterface */
-  0x01,                                                        /* bSlaveInterface0 */
-  
-  /**** CDC Control Endpoint ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_CMD_EP,                                                  /* bEndpointAddress */
-  0x03,                                                        /* bmAttributes */
-  LOBYTE(CDC_CMD_PACKET_SIZE),                                 /* wMaxPacketSize */
-  HIBYTE(CDC_CMD_PACKET_SIZE),
-  0xff,                                                        /* bInterval */ 
-
-  /**** CDC Data Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x01,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x02,                                                        /* bNumEndpoints */
-  0x0a,                                                        /* bInterfaceClass */
-  0x00,                                                        /* bInterfaceSubClass */
-  0x00,                                                        /* bInterfaceProtocol */
-  0x06,                                                        /* iInterface */
-
-  /**** CDC Data Endpoint IN ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_IN_EP,                                                   /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),                         /* wMaxPacketSize */
-  HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
-  0x00,                                                        /* bInterval */
-
-  /**** CDC Data Endpoint OUT ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_OUT_EP,                                                  /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),                         /* wMaxPacketSize */
-  HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
-  0x00,                                                        /* bInterval */
-
-  /**** HID Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x02,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x02,                                                        /* bNumEndpoints */
-  0x03,                                                        /* bInterfaceClass */
-  0x00,                                                        /* bInterfaceSubClass */
-  0x00,                                                        /* bInterfaceProtocol */
-  0x09,                                                        /* iInterface */
-
-  /**** HID Descriptor ****/
-  0x09,                                                        /* bLength */
-  0x21,                                                        /* bDescriptorType */
-  0x11,                                                        /* bcdHID */
-  0x01,
-  0x00,                                                        /* bCountryCode */
-  0x01,                                                        /* bNumDescriptors */
-  0x22,                                                        /* bDescriptorType */
-  LOBYTE(USB_HID_REPORT_DESC_SIZ),                             /* wItemLength */
-  HIBYTE(USB_HID_REPORT_DESC_SIZ),
-
-  /**** HID Endpoint IN ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  HID_EPIN_ADDR,                                               /* bEndpointAddress */
-  0x03,                                                        /* bmAttributes */
-  LOBYTE(HID_EPIN_SIZE),                                       /* wMaxPacketSize */
-  HIBYTE(HID_EPIN_SIZE),
-  0x01,                                                        /* bInterval */
-
-  /**** HID Endpoint OUT ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  HID_EPOUT_ADDR,                                              /* bEndpointAddress */
-  0x03,                                                        /* bmAttributes */
-  LOBYTE(HID_EPOUT_SIZE),                                      /* wMaxPacketSize */
-  HIBYTE(HID_EPOUT_SIZE),
-  0x01,                                                        /* bInterval */
+  CONFIG_DESCRIPTOR_DATA(USB_CDC_HID_CONFIG_DESC_SIZ, 3),
+  CDC_INTERFACES_DATA(0),
+  HID_INTERFACE_DATA(2),
 };
 
 static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_4[USB_CDC_MSC_HID_CONFIG_DESC_SIZ] =
 {
-  /**** Configuration Descriptor ****/
-  0x09,                                                        /* bLength */
-  0x02,                                                        /* bDescriptorType */
-  LOBYTE((USB_CDC_MSC_HID_CONFIG_DESC_SIZ)),                   /* wTotalLength */
-  HIBYTE((USB_CDC_MSC_HID_CONFIG_DESC_SIZ)),
-  0x04,                                                        /* bNumInterfaces */
-  0x01,                                                        /* bConfigurationValue */
-  0x00,                                                        /* iConfiguration */
-  0x80,                                                        /* bmAttributes */
-  0x32,                                                        /* bMaxPower */
-
-  /**** IAD to associate the two CDC interfaces ****/
-  0x08,                                                        /* bLength */
-  0x0b,                                                        /* bDescriptorType */
-  0x00,                                                        /* bFirstInterface */
-  0x02,                                                        /* bInterfaceCount */
-  0x02,                                                        /* bFunctionClass */
-  0x02,                                                        /* bFunctionSubClass */
-  0x01,                                                        /* bFunctionProtocol */
-  0x04,                                                        /* iFunction */
-
-  /**** CDC Control Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x00,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x01,                                                        /* bNumEndpoints */
-  0x02,                                                        /* bInterfaceClass */
-  0x02,                                                        /* bInterfaceSubClass */
-  0x01,                                                        /* bInterfaceProtocol */
-  0x05,                                                        /* iInterface */
-  
-  /**** CDC Header ****/
-  0x05,                                                        /* bLength */
-  0x24,                                                        /* bDescriptorType */
-  0x00,                                                        /* bDescriptorSubtype */
-  0x10,                                                        /* bcdCDC */
-  0x01,
-  
-  /**** CDC Call Management ****/
-  0x05,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x01,                                                        /* bDescriptorSubtype */
-  0x00,                                                        /* bmCapabilities */
-  0x01,                                                        /* bDataInterface */
-  
-  /**** CDC ACM ****/
-  0x04,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x02,                                                        /* bDescriptorSubtype */
-  0x02,                                                        /* bmCapabilities */
-  
-  /**** CDC Union ****/
-  0x05,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x06,                                                        /* bDescriptorSubtype */
-  0x00,                                                        /* bMasterInterface */
-  0x01,                                                        /* bSlaveInterface0 */
-  
-  /**** CDC Control Endpoint ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_CMD_EP,                                                  /* bEndpointAddress */
-  0x03,                                                        /* bmAttributes */
-  LOBYTE(CDC_CMD_PACKET_SIZE),                                 /* wMaxPacketSize */
-  HIBYTE(CDC_CMD_PACKET_SIZE),
-  0xff,                                                        /* bInterval */ 
-
-  /**** CDC Data Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x01,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x02,                                                        /* bNumEndpoints */
-  0x0a,                                                        /* bInterfaceClass */
-  0x00,                                                        /* bInterfaceSubClass */
-  0x00,                                                        /* bInterfaceProtocol */
-  0x06,                                                        /* iInterface */
-
-  /**** CDC Control Endpoint IN ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_IN_EP,                                                   /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),                         /* wMaxPacketSize */
-  HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
-  0x00,                                                        /* bInterval */
-
-  /**** CDC Control Endpoint OUT ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_OUT_EP,                                                  /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),                         /* wMaxPacketSize */
-  HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
-  0x00,                                                        /* bInterval */
-
-  /**** MSC Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x02,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x02,                                                        /* bNumEndpoints */
-  0x08,                                                        /* bInterfaceClass */
-  0x06,                                                        /* bInterfaceSubClass */
-  0x50,                                                        /* nInterfaceProtocol */
-  0x07,                                                        /* iInterface */
-
-  /**** MSC Endpoint IN ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  MSC_EPIN_ADDR,                                               /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(MSC_MAX_FS_PACKET),                                   /* wMaxPacketSize */
-  HIBYTE(MSC_MAX_FS_PACKET),
-  0x00,                                                        /* bInterval */
-
-  /**** MSC Endpoint OUT ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  MSC_EPOUT_ADDR,                                              /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(MSC_MAX_FS_PACKET),                                   /* wMaxPacketSize */
-  HIBYTE(MSC_MAX_FS_PACKET),
-  0x00,                                                        /* bInterval */
-
-  /**** HID Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x03,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x02,                                                        /* bNumEndpoints */
-  0x03,                                                        /* bInterfaceClass */
-  0x00,                                                        /* bInterfaceSubClass */
-  0x00,                                                        /* bInterfaceProtocol */
-  0x09,                                                        /* iInterface */
-
-  /**** HID Descriptor ****/
-  0x09,                                                        /* bLength */
-  0x21,                                                        /* bDescriptorType */
-  0x11,                                                        /* bcdHID */
-  0x01,
-  0x00,                                                        /* bCountryCode */
-  0x01,                                                        /* bNumDescriptors */
-  0x22,                                                        /* bDescriptorType */
-  LOBYTE(USB_HID_REPORT_DESC_SIZ),                             /* wItemLength */
-  HIBYTE(USB_HID_REPORT_DESC_SIZ),
-
-  /**** HID Endpoint IN ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  HID_EPIN_ADDR,                                               /* bEndpointAddress */
-  0x03,                                                        /* bmAttributes */
-  LOBYTE(HID_EPIN_SIZE),                                       /* wMaxPacketSize */
-  HIBYTE(HID_EPIN_SIZE),
-  0x01,                                                        /* bInterval */
-
-  /**** HID Endpoint OUT ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  HID_EPOUT_ADDR,                                              /* bEndpointAddress */
-  0x03,                                                        /* bmAttributes */
-  LOBYTE(HID_EPOUT_SIZE),                                      /* wMaxPacketSize */
-  HIBYTE(HID_EPOUT_SIZE),
-  0x01,                                                        /* bInterval */
+  CONFIG_DESCRIPTOR_DATA(USB_CDC_MSC_HID_CONFIG_DESC_SIZ, 4),
+  CDC_INTERFACES_DATA(0),
+  MSC_INTERFACE_DATA(2),
+  HID_INTERFACE_DATA(3),
 };
 
 #define USB_DAP_REPORT_DESC_SIZ 28
@@ -851,311 +505,32 @@ static const uint8_t USBD_DAP_ReportDescriptor[USB_DAP_REPORT_DESC_SIZ] =
 
 static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_5[USB_CDC_HID_CONFIG_DESC_SIZ] =
 {
-  /**** Configuration Descriptor ****/
-  0x09,                                                        /* bLength */
-  0x02,                                                        /* bDescriptorType */
-  LOBYTE(USB_CDC_HID_CONFIG_DESC_SIZ),                         /* wTotalLength */
-  HIBYTE(USB_CDC_HID_CONFIG_DESC_SIZ),
-  0x03,                                                        /* bNumInterfaces */
-  0x01,                                                        /* bConfigurationValue */
-  0x00,                                                        /* iConfiguration */
-  0x80,                                                        /* bmAttributes */
-  0x32,                                                        /* bMaxPower */
-
-  /**** IAD to associate the two CDC interfaces ****/
-  0x08,                                                        /* bLength */
-  0x0b,                                                        /* bDescriptorType */
-  0x00,                                                        /* bFirstInterface */
-  0x02,                                                        /* bInterfaceCount */
-  0x02,                                                        /* bFunctionClass */
-  0x02,                                                        /* bFunctionSubClass */
-  0x01,                                                        /* bFunctionProtocol */
-  0x04,                                                        /* iFunction */
-
-  /**** CDC Control Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x00,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x01,                                                        /* bNumEndpoints */
-  0x02,                                                        /* bInterfaceClass */
-  0x02,                                                        /* bInterfaceSubClass */
-  0x01,                                                        /* bInterfaceProtocol */
-  0x05,                                                        /* iInterface */
-  
-  /**** CDC Header ****/
-  0x05,                                                        /* bLength */
-  0x24,                                                        /* bDescriptorType */
-  0x00,                                                        /* bDescriptorSubtype */
-  0x10,                                                        /* bcdCDC */
-  0x01,
-  
-  /**** CDC Call Management ****/
-  0x05,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x01,                                                        /* bDescriptorSubtype */
-  0x00,                                                        /* bmCapabilities */
-  0x01,                                                        /* bDataInterface */
-  
-  /**** CDC ACM ****/
-  0x04,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x02,                                                        /* bDescriptorSubtype */
-  0x02,                                                        /* bmCapabilities */
-  
-  /**** CDC Union ****/
-  0x05,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x06,                                                        /* bDescriptorSubtype */
-  0x00,                                                        /* bMasterInterface */
-  0x01,                                                        /* bSlaveInterface0 */
-  
-  /**** CDC Control Endpoint ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_CMD_EP,                                                  /* bEndpointAddress */
-  0x03,                                                        /* bmAttributes */
-  LOBYTE(CDC_CMD_PACKET_SIZE),                                 /* wMaxPacketSize */
-  HIBYTE(CDC_CMD_PACKET_SIZE),
-  0xff,                                                        /* bInterval */ 
-
-  /**** CDC Data Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x01,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x02,                                                        /* bNumEndpoints */
-  0x0a,                                                        /* bInterfaceClass */
-  0x00,                                                        /* bInterfaceSubClass */
-  0x00,                                                        /* bInterfaceProtocol */
-  0x06,                                                        /* iInterface */
-
-  /**** CDC Data Endpoint IN ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_IN_EP,                                                   /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),                         /* wMaxPacketSize */
-  HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
-  0x00,                                                        /* bInterval */
-
-  /**** CDC Data Endpoint OUT ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_OUT_EP,                                                  /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),                         /* wMaxPacketSize */
-  HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
-  0x00,                                                        /* bInterval */
-
-  /**** HID Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x02,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x02,                                                        /* bNumEndpoints */
-  0x03,                                                        /* bInterfaceClass */
-  0x00,                                                        /* bInterfaceSubClass */
-  0x00,                                                        /* bInterfaceProtocol */
-  0x09,                                                        /* iInterface */
-
-  /**** HID Descriptor ****/
-  0x09,                                                        /* bLength */
-  0x21,                                                        /* bDescriptorType */
-  0x11,                                                        /* bcdHID */
-  0x01,
-  0x00,                                                        /* bCountryCode */
-  0x01,                                                        /* bNumDescriptors */
-  0x22,                                                        /* bDescriptorType */
-  LOBYTE(USB_DAP_REPORT_DESC_SIZ),                             /* wItemLength */
-  HIBYTE(USB_DAP_REPORT_DESC_SIZ),
-
-  /**** HID Endpoint IN ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  HID_EPIN_ADDR,                                               /* bEndpointAddress */
-  0x03,                                                        /* bmAttributes */
-  LOBYTE(HID_EPIN_SIZE),                                       /* wMaxPacketSize */
-  HIBYTE(HID_EPIN_SIZE),
-  0x01,                                                        /* bInterval */
-
-  /**** HID Endpoint OUT ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  HID_EPOUT_ADDR,                                              /* bEndpointAddress */
-  0x03,                                                        /* bmAttributes */
-  LOBYTE(HID_EPOUT_SIZE),                                      /* wMaxPacketSize */
-  HIBYTE(HID_EPOUT_SIZE),
-  0x01,                                                        /* bInterval */
+  CONFIG_DESCRIPTOR_DATA(USB_CDC_HID_CONFIG_DESC_SIZ, 3),
+  CDC_INTERFACES_DATA(0),
+  HID_INTERFACE_DATA(2),
 };
 
 static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_6[USB_CDC_MSC_HID_CONFIG_DESC_SIZ] =
 {
-  /**** Configuration Descriptor ****/
-  0x09,                                                        /* bLength */
-  0x02,                                                        /* bDescriptorType */
-  LOBYTE((USB_CDC_MSC_HID_CONFIG_DESC_SIZ)),                   /* wTotalLength */
-  HIBYTE((USB_CDC_MSC_HID_CONFIG_DESC_SIZ)),
-  0x04,                                                        /* bNumInterfaces */
-  0x01,                                                        /* bConfigurationValue */
-  0x00,                                                        /* iConfiguration */
-  0x80,                                                        /* bmAttributes */
-  0x32,                                                        /* bMaxPower */
+  CONFIG_DESCRIPTOR_DATA(USB_CDC_MSC_HID_CONFIG_DESC_SIZ, 4),
+  CDC_INTERFACES_DATA(0),
+  MSC_INTERFACE_DATA(2),
+  HID_INTERFACE_DATA(3),
+};
 
-  /**** IAD to associate the two CDC interfaces ****/
-  0x08,                                                        /* bLength */
-  0x0b,                                                        /* bDescriptorType */
-  0x00,                                                        /* bFirstInterface */
-  0x02,                                                        /* bInterfaceCount */
-  0x02,                                                        /* bFunctionClass */
-  0x02,                                                        /* bFunctionSubClass */
-  0x01,                                                        /* bFunctionProtocol */
-  0x04,                                                        /* iFunction */
+static const uint8_t USBD_CDC_WEBUSB_ConigurationDescriptor_7[USB_CDC_WEBUSB_CONFIG_DESC_SIZ] =
+{
+  CONFIG_DESCRIPTOR_DATA(USB_CDC_WEBUSB_CONFIG_DESC_SIZ, 3),
+  CDC_INTERFACES_DATA(0),
+  WEBUSB_INTERFACE_DATA(2),
+};
 
-  /**** CDC Control Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x00,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x01,                                                        /* bNumEndpoints */
-  0x02,                                                        /* bInterfaceClass */
-  0x02,                                                        /* bInterfaceSubClass */
-  0x01,                                                        /* bInterfaceProtocol */
-  0x05,                                                        /* iInterface */
-  
-  /**** CDC Header ****/
-  0x05,                                                        /* bLength */
-  0x24,                                                        /* bDescriptorType */
-  0x00,                                                        /* bDescriptorSubtype */
-  0x10,                                                        /* bcdCDC */
-  0x01,
-  
-  /**** CDC Call Management ****/
-  0x05,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x01,                                                        /* bDescriptorSubtype */
-  0x00,                                                        /* bmCapabilities */
-  0x01,                                                        /* bDataInterface */
-  
-  /**** CDC ACM ****/
-  0x04,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x02,                                                        /* bDescriptorSubtype */
-  0x02,                                                        /* bmCapabilities */
-  
-  /**** CDC Union ****/
-  0x05,                                                        /* bFunctionLength */
-  0x24,                                                        /* bDescriptorType */
-  0x06,                                                        /* bDescriptorSubtype */
-  0x00,                                                        /* bMasterInterface */
-  0x01,                                                        /* bSlaveInterface0 */
-  
-  /**** CDC Control Endpoint ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_CMD_EP,                                                  /* bEndpointAddress */
-  0x03,                                                        /* bmAttributes */
-  LOBYTE(CDC_CMD_PACKET_SIZE),                                 /* wMaxPacketSize */
-  HIBYTE(CDC_CMD_PACKET_SIZE),
-  0xff,                                                        /* bInterval */ 
-
-  /**** CDC Data Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x01,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x02,                                                        /* bNumEndpoints */
-  0x0a,                                                        /* bInterfaceClass */
-  0x00,                                                        /* bInterfaceSubClass */
-  0x00,                                                        /* bInterfaceProtocol */
-  0x06,                                                        /* iInterface */
-
-  /**** CDC Control Endpoint IN ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_IN_EP,                                                   /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),                         /* wMaxPacketSize */
-  HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
-  0x00,                                                        /* bInterval */
-
-  /**** CDC Control Endpoint OUT ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  CDC_OUT_EP,                                                  /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),                         /* wMaxPacketSize */
-  HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
-  0x00,                                                        /* bInterval */
-
-  /**** MSC Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x02,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x02,                                                        /* bNumEndpoints */
-  0x08,                                                        /* bInterfaceClass */
-  0x06,                                                        /* bInterfaceSubClass */
-  0x50,                                                        /* nInterfaceProtocol */
-  0x07,                                                        /* iInterface */
-
-  /**** MSC Endpoint IN ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  MSC_EPIN_ADDR,                                               /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(MSC_MAX_FS_PACKET),                                   /* wMaxPacketSize */
-  HIBYTE(MSC_MAX_FS_PACKET),
-  0x00,                                                        /* bInterval */
-
-  /**** MSC Endpoint OUT ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  MSC_EPOUT_ADDR,                                              /* bEndpointAddress */
-  0x02,                                                        /* bmAttributes */
-  LOBYTE(MSC_MAX_FS_PACKET),                                   /* wMaxPacketSize */
-  HIBYTE(MSC_MAX_FS_PACKET),
-  0x00,                                                        /* bInterval */
-
-  /**** HID Interface ****/
-  0x09,                                                        /* bLength */
-  0x04,                                                        /* bDescriptorType */
-  0x03,                                                        /* bInterfaceNumber */
-  0x00,                                                        /* bAlternateSetting */
-  0x02,                                                        /* bNumEndpoints */
-  0x03,                                                        /* bInterfaceClass */
-  0x00,                                                        /* bInterfaceSubClass */
-  0x00,                                                        /* bInterfaceProtocol */
-  0x09,                                                        /* iInterface */
-
-  /**** HID Descriptor ****/
-  0x09,                                                        /* bLength */
-  0x21,                                                        /* bDescriptorType */
-  0x11,                                                        /* bcdHID */
-  0x01,
-  0x00,                                                        /* bCountryCode */
-  0x01,                                                        /* bNumDescriptors */
-  0x22,                                                        /* bDescriptorType */
-  LOBYTE(USB_DAP_REPORT_DESC_SIZ),                             /* wItemLength */
-  HIBYTE(USB_DAP_REPORT_DESC_SIZ),
-
-  /**** HID Endpoint IN ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  HID_EPIN_ADDR,                                               /* bEndpointAddress */
-  0x03,                                                        /* bmAttributes */
-  LOBYTE(HID_EPIN_SIZE),                                       /* wMaxPacketSize */
-  HIBYTE(HID_EPIN_SIZE),
-  0x01,                                                        /* bInterval */
-
-  /**** HID Endpoint OUT ****/
-  0x07,                                                        /* bLength */
-  0x05,                                                        /* bDescriptorType */
-  HID_EPOUT_ADDR,                                              /* bEndpointAddress */
-  0x03,                                                        /* bmAttributes */
-  LOBYTE(HID_EPOUT_SIZE),                                      /* wMaxPacketSize */
-  HIBYTE(HID_EPOUT_SIZE),
-  0x01,                                                        /* bInterval */
+static const uint8_t USBD_CDC_MSC_WEBUSB_ConigurationDescriptor_8[USB_CDC_MSC_WEBUSB_CONFIG_DESC_SIZ] =
+{
+  CONFIG_DESCRIPTOR_DATA(USB_CDC_MSC_WEBUSB_CONFIG_DESC_SIZ, 4),
+  CDC_INTERFACES_DATA(0),
+  MSC_INTERFACE_DATA(2),
+  WEBUSB_INTERFACE_DATA(3),
 };
 
 static const uint8_t * USBD_CDC_MSC_ConigurationDescriptorData = NULL;
@@ -1185,6 +560,7 @@ static uint8_t  USBD_CDC_MSC_Init (USBD_HandleTypeDef *pdev,
 
   if (USBD_MSC_Class_Interface) (*USBD_MSC_Class_Interface->Init)(pdev, cfgidx);
   if (USBD_HID_Class_Interface) (*USBD_HID_Class_Interface->Init)(pdev, cfgidx);
+  if (USBD_WEBUSB_Class_Interface) (*USBD_WEBUSB_Class_Interface->Init)(pdev, cfgidx);
     
   return USBD_OK;
 }
@@ -1201,6 +577,7 @@ static uint8_t  USBD_CDC_MSC_DeInit (USBD_HandleTypeDef *pdev,
 {
   if (USBD_HID_Class_Interface) (*USBD_HID_Class_Interface->DeInit)(pdev, cfgidx);
   if (USBD_MSC_Class_Interface) (*USBD_MSC_Class_Interface->DeInit)(pdev, cfgidx);
+  if (USBD_WEBUSB_Class_Interface) (*USBD_WEBUSB_Class_Interface->DeInit)(pdev, cfgidx);
 
   USBD_CDC_DeInit(pdev, cfgidx);
     
@@ -1232,6 +609,12 @@ static uint8_t  USBD_CDC_MSC_Setup (USBD_HandleTypeDef *pdev,
 	    return (*USBD_MSC_Class_Interface->Setup)(pdev, req);
 	  }
 	}
+      else if (req->wIndex == USBD_WEBUSB_Interface)
+	{
+	  if (USBD_WEBUSB_Class_Interface) {
+	    return (*USBD_WEBUSB_Class_Interface->Setup)(pdev, req);
+	  }
+	}
       else
 	{
 	  return (USBD_CDC_Setup(pdev, req));
@@ -1248,6 +631,12 @@ static uint8_t  USBD_CDC_MSC_Setup (USBD_HandleTypeDef *pdev,
 	{
 	  if (USBD_MSC_Class_Interface) {
 	    return (*USBD_MSC_Class_Interface->Setup)(pdev, req);
+	  }
+	}
+      else if ((req->wIndex == WEBUSB_IN_EP) || (req->wIndex == WEBUSB_OUT_EP))
+	{
+	  if (USBD_WEBUSB_Class_Interface) {
+	    return (*USBD_WEBUSB_Class_Interface->Setup)(pdev, req);
 	  }
 	}
       else
@@ -1275,6 +664,10 @@ static uint8_t  USBD_CDC_MSC_DataIn (USBD_HandleTypeDef *pdev, uint8_t epnum)
     {
       return (*USBD_MSC_Class_Interface->DataIn)(pdev, epnum);
     }
+  else if (epnum == (WEBUSB_IN_EP&~0x80))
+    {
+      return (*USBD_WEBUSB_Class_Interface->DataIn)(pdev, epnum);
+    }
   else
     {
       return (USBD_CDC_DataIn(pdev, epnum));
@@ -1297,6 +690,10 @@ static uint8_t  USBD_CDC_MSC_DataOut (USBD_HandleTypeDef *pdev, uint8_t epnum)
   else if (epnum == (MSC_EPOUT_ADDR&~0x80))
     {
       return (*USBD_MSC_Class_Interface->DataOut)(pdev, epnum);
+    }
+  else if (epnum == (WEBUSB_OUT_EP&~0x80))
+    {
+      return (*USBD_WEBUSB_Class_Interface->DataOut)(pdev, epnum);
     }
   else
     {
@@ -1476,6 +873,35 @@ void USBD_CDC_MSC_DAP_Initialize(USBD_HandleTypeDef *pdev)
   USBD_HID_RegisterInterface(pdev, &stm32l4_usbd_dap_interface, USBD_DAP_ReportDescriptor, sizeof(USBD_DAP_ReportDescriptor));
 }
 
+void USBD_CDC_WEBUSB_Initialize(USBD_HandleTypeDef *pdev)
+{
+  USBD_CDC_MSC_ConigurationDescriptorLength = sizeof(USBD_CDC_WEBUSB_ConigurationDescriptor_7);
+  USBD_CDC_MSC_ConigurationDescriptorData = USBD_CDC_WEBUSB_ConigurationDescriptor_7;
+
+  USBD_WEBUSB_Class_Interface = &USBD_WEBUSB_CLASS_Interface;
+  USBD_WEBUSB_Interface = 2;
+
+  USBD_RegisterClass(pdev, &USBD_CDC_MSC_CLASS);
+  USBD_CDC_RegisterInterface(pdev, &stm32l4_usbd_cdc_interface);
+  USBD_WEBUSB_RegisterInterface(pdev, &stm32l4_usbd_webusb_interface);
+}
+
+void USBD_CDC_MSC_WEBUSB_Initialize(USBD_HandleTypeDef *pdev)
+{
+  USBD_CDC_MSC_ConigurationDescriptorLength = sizeof(USBD_CDC_MSC_WEBUSB_ConigurationDescriptor_8);
+  USBD_CDC_MSC_ConigurationDescriptorData = USBD_CDC_MSC_WEBUSB_ConigurationDescriptor_8;
+
+  USBD_MSC_Class_Interface = &USBD_MSC_CLASS_Interface;
+  USBD_WEBUSB_Class_Interface = &USBD_WEBUSB_CLASS_Interface;
+
+  USBD_MSC_Interface = 2;
+  USBD_WEBUSB_Interface = 3;
+
+  USBD_RegisterClass(pdev, &USBD_CDC_MSC_CLASS);
+  USBD_CDC_RegisterInterface(pdev, &stm32l4_usbd_cdc_interface);
+  USBD_MSC_RegisterStorage(pdev, &dosfs_storage_interface);
+  USBD_WEBUSB_RegisterInterface(pdev, &stm32l4_usbd_webusb_interface);
+}
 
 
 /**

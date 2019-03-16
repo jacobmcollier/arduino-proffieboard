@@ -587,7 +587,8 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
   HAL_PCDEx_SetTxFiFo(&hpcd, 1, 0x04); /*  16 bytes EP1/CDC/CTRL transmit */
   HAL_PCDEx_SetTxFiFo(&hpcd, 2, 0x20); /* 128 bytes EP2/CDC/DATA transmit */
   HAL_PCDEx_SetTxFiFo(&hpcd, 3, 0x80); /* 512 bytes EP3/MSC transmit      */ 
-  HAL_PCDEx_SetTxFiFo(&hpcd, 4, 0x10); /*  64 bytes EP3/HID transmit      */
+  HAL_PCDEx_SetTxFiFo(&hpcd, 4, 0x10); /*  64 bytes EP4/HID transmit      */
+  HAL_PCDEx_SetTxFiFo(&hpcd, 5, 0x10); /*  64 bytes EP4/WEBUSB transmit      */
 
 #else /* defined(STM32L476xx) || defined(STM32L496xx) */
 
@@ -618,6 +619,8 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
   HAL_PCDEx_PMAConfig(&hpcd ,0x03, PCD_SNG_BUF, 0x180); /*  64 bytes EP3/MSC out      */ 
   HAL_PCDEx_PMAConfig(&hpcd, 0x84, PCD_SNG_BUF, 0x1c0); /*  64 bytes EP4/HID in       */ 
   HAL_PCDEx_PMAConfig(&hpcd ,0x04, PCD_SNG_BUF, 0x200); /*  64 bytes EP4/HID out      */ 
+  HAL_PCDEx_PMAConfig(&hpcd, 0x85, PCD_SNG_BUF, 0x240); /*  64 bytes EP5/HID in       */ 
+  HAL_PCDEx_PMAConfig(&hpcd ,0x05, PCD_SNG_BUF, 0x280); /*  64 bytes EP5/HID out      */ 
 #endif /* defined(STM32L476xx) || defined(STM32L496xx) */
   
   return USBD_OK;

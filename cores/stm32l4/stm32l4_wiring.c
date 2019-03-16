@@ -65,6 +65,7 @@ const __attribute__((section(".iap_info"))) stm32l4_iap_info_t stm32l4_iap_info 
 stm32l4_adc_t stm32l4_adc;
 stm32l4_exti_t stm32l4_exti;
 
+#if 1
 void __attribute__((naked)) HardFault_Handler (void)
 {
   asm volatile(
@@ -80,6 +81,20 @@ void __attribute__((naked)) HardFault_Handler (void)
     : /* Clobbers */
     );
 }
+#else
+void **HARDFAULT_PSP;
+register void *stack_pointer asm("sp");
+void HardFault_Handler (void) {
+   asm("mrs %0, psp" : "=r"(HARDFAULT_PSP) : :);
+   stack_pointer = HARDFAULT_PSP;
+    while (1)
+    {
+#if defined(USBCON)
+	USBD_Poll();
+#endif
+    }
+}
+#endif
   
 void __attribute__((used)) HardFault_Handler_C(uint32_t *frame, uint32_t lr)
 {
