@@ -1,5 +1,5 @@
 /**
-  ******************************************************************************
+  ******************************************************************************
   * @file    usbd_cdc.c
   * @author  MCD Application Team
   * @version V2.4.2
@@ -120,6 +120,9 @@ uint8_t  USBD_WEBUSB_DataOut (USBD_HandleTypeDef *pdev,
 			   uint8_t epnum);
 
 
+// static const uint8_t* USDB_WEBUSB_MS_OS_20_Descriptor;
+// static uint16_t USDB_WEBUSB_MS_OS_20_Length;
+
 /**
   * @}
   */ 
@@ -220,7 +223,7 @@ uint8_t USBD_WEBUSB_DeInit (USBD_HandleTypeDef *pdev,
   * @retval status
   */
 uint8_t USBD_WEBUSB_Setup (USBD_HandleTypeDef *pdev, 
-			 USBD_SetupReqTypedef *req)
+			   USBD_SetupReqTypedef *req)
 {
   USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData[3];
   static uint8_t ifalt = 0;
@@ -267,6 +270,18 @@ uint8_t USBD_WEBUSB_Setup (USBD_HandleTypeDef *pdev,
     case USB_REQ_SET_INTERFACE :
       break;
     }
+    break;
+
+#if 0    
+    case USB_REQ_TYPE_VENDOR:
+      if (req->bRequest == 0x02 && req->wIndex == USB_BOS_DESCRIPTOR_TYPE)
+      {
+	USBD_CtlSendData (pdev, 
+			  (uint8_t*)USDB_WEBUSB_MS_OS_20_Descriptor,
+			  MIN(USDB_WEBUSB_MS_OS_20_Length, req->wLength));
+      }
+      break;
+#endif      
  
   default: 
     break;
@@ -319,8 +334,9 @@ uint8_t USBD_WEBUSB_DataOut (USBD_HandleTypeDef *pdev, uint8_t epnum)
   * @retval status
   */
 uint8_t USBD_WEBUSB_RegisterInterface  (USBD_HandleTypeDef   *pdev, 
-                                      const USBD_CDC_ItfTypeDef *fops)
-{
+					const USBD_CDC_ItfTypeDef *fops
+					/* const uint8_t* ms_20_desc,
+					   uint16_t ms_20_len */) {
   uint8_t  ret = USBD_FAIL;
   
   if(fops != NULL)
@@ -328,7 +344,10 @@ uint8_t USBD_WEBUSB_RegisterInterface  (USBD_HandleTypeDef   *pdev,
     pdev->pUserData[3] = fops;
     ret = USBD_OK;    
   }
-  
+
+  // USDB_WEBUSB_MS_OS_20_Descriptor = ms_20_desc;
+  // USDB_WEBUSB_MS_OS_20_Length = ms_20_len;
+
   return ret;
 }
 

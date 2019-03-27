@@ -279,7 +279,7 @@ USBD_StatusTypeDef USBD_LL_SetupStage(USBD_HandleTypeDef *pdev, uint8_t *psetup)
     break;
     
   case USB_REQ_RECIPIENT_ENDPOINT:        
-    USBD_StdEPReq(pdev, &pdev->request);   
+    USBD_StdEPReq(pdev, &pdev->request);
     break;
     
   default:           

@@ -81,7 +81,9 @@ extern const char *USBD_SuffixString;
 
 /** @defgroup USBD_CDC_MSC_Private_Macros
   * @{
-  */ 
+  */
+
+#define ct_assert(e) extern char (*ct_assert(void)) [sizeof(char[1 - 2*!(e)])]
 
 /**
   * @}
@@ -118,8 +120,9 @@ static const uint8_t  *USBD_CDC_MSC_GetOtherSpeedCfgDesc (uint16_t *length);
 
 static const uint8_t  *USBD_CDC_MSC_GetDeviceQualifierDescriptor (uint16_t *length);
 
+
 /* USB Standard Device Descriptor */
-static const uint8_t USBD_CDC_MSC_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_DESC] =
+static const uint8_t USBD_CDC_MSC_DeviceQualifierDesc[] =
 {
   USB_LEN_DEV_QUALIFIER_DESC,
   USB_DESC_TYPE_DEVICE_QUALIFIER,
@@ -132,6 +135,8 @@ static const uint8_t USBD_CDC_MSC_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_DESC
   0x01,
   0x00,
 };
+
+ct_assert(sizeof(USBD_CDC_MSC_DeviceQualifierDesc) == USB_LEN_DEV_QUALIFIER_DESC);
 
 /**
   * @}
@@ -240,6 +245,7 @@ static uint16_t USBD_WEBUSB_Interface = 0xffff;
 #define USB_MSC_CONFIG_DESC_SIZ   (9+7+7)
 #define USB_HID_CONFIG_DESC_SIZ   (9+9+7+7)
 #define USB_WEBUSB_CONFIG_DESC_SIZ   (9+7+7)
+#define USB_DUMMY_CONFIG_DESC_SIZ   (9)
 
 #define USB_CDC_INTERFACE_CONTROL 0
 #define USB_CDC_INTERFACE_DATA    1
@@ -248,17 +254,18 @@ static uint16_t USBD_WEBUSB_Interface = 0xffff;
 #define USB_MSC_INTERFACE_COUNT   1
 #define USB_HID_INTERFACE_COUNT   1
 #define USB_WEBUSB_INTERFACE_COUNT   1
+#define USB_DUMMY_INTERFACE_COUNT   1
 
-#define USB_CDC_MSC_CONFIG_DESC_SIZ      (USB_CDC_CONFIG_DESC_SIZ + USB_MSC_CONFIG_DESC_SIZ)
-#define USB_CDC_HID_CONFIG_DESC_SIZ      (USB_CDC_CONFIG_DESC_SIZ + USB_HID_CONFIG_DESC_SIZ)
-#define USB_CDC_MSC_HID_CONFIG_DESC_SIZ  (USB_CDC_CONFIG_DESC_SIZ + USB_MSC_CONFIG_DESC_SIZ + USB_HID_CONFIG_DESC_SIZ)
-#define USB_CDC_WEBUSB_CONFIG_DESC_SIZ  (USB_CDC_CONFIG_DESC_SIZ + USB_WEBUSB_CONFIG_DESC_SIZ)
-#define USB_CDC_MSC_WEBUSB_CONFIG_DESC_SIZ  (USB_CDC_CONFIG_DESC_SIZ + USB_MSC_CONFIG_DESC_SIZ + USB_WEBUSB_CONFIG_DESC_SIZ)
+#define USB_CDC_MSC_CONFIG_DESC_SIZ      (USB_CDC_CONFIG_DESC_SIZ + USB_DUMMY_CONFIG_DESC_SIZ + USB_MSC_CONFIG_DESC_SIZ)
+#define USB_CDC_HID_CONFIG_DESC_SIZ      (USB_CDC_CONFIG_DESC_SIZ + USB_DUMMY_CONFIG_DESC_SIZ + USB_HID_CONFIG_DESC_SIZ)
+#define USB_CDC_MSC_HID_CONFIG_DESC_SIZ  (USB_CDC_CONFIG_DESC_SIZ + USB_DUMMY_CONFIG_DESC_SIZ + USB_MSC_CONFIG_DESC_SIZ + USB_HID_CONFIG_DESC_SIZ)
+#define USB_CDC_WEBUSB_CONFIG_DESC_SIZ   (USB_CDC_CONFIG_DESC_SIZ + USB_WEBUSB_CONFIG_DESC_SIZ)
+#define USB_CDC_MSC_WEBUSB_CONFIG_DESC_SIZ  (USB_CDC_CONFIG_DESC_SIZ + USB_WEBUSB_CONFIG_DESC_SIZ + USB_MSC_CONFIG_DESC_SIZ )
 
-#define USB_CDC_MSC_INTERFACE_COUNT      (USB_CDC_INTERFACE_COUNT + USB_MSC_INTERFACE_COUNT)
-#define USB_CDC_HID_INTERFACE_COUNT      (USB_CDC_INTERFACE_COUNT + USB_HID_INTERFACE_COUNT)
-#define USB_CDC_MSC_HID_INTERFACE_COUNT  (USB_CDC_INTERFACE_COUNT + USB_MSC_INTERFACE_COUNT + USB_HID_INTERFACE_COUNT)
-#define USB_CDC_WEBUSB_INTERFACE_COUNT  (USB_CDC_INTERFACE_COUNT + USB_WEBUSB_INTERFACE_COUNT)
+#define USB_CDC_MSC_INTERFACE_COUNT      (USB_CDC_INTERFACE_COUNT + USB_DUMMY_CONFIG_INTERFACE_COUNT + USB_MSC_INTERFACE_COUNT)
+#define USB_CDC_HID_INTERFACE_COUNT      (USB_CDC_INTERFACE_COUNT + USB_DUMMY_CONFIG_INTERFACE_COUNT + USB_HID_INTERFACE_COUNT)
+#define USB_CDC_MSC_HID_INTERFACE_COUNT  (USB_CDC_INTERFACE_COUNT + USB_DUMMY_CONFIG_INTERFACE_COUNT + USB_MSC_INTERFACE_COUNT + USB_HID_INTERFACE_COUNT)
+#define USB_CDC_WEBUSB_INTERFACE_COUNT   (USB_CDC_INTERFACE_COUNT + USB_WEBUSB_INTERFACE_COUNT)
 #define USB_CDC_MSC_WEBUSB_INTERFACE_COUNT  (USB_CDC_INTERFACE_COUNT + USB_MSC_INTERFACE_COUNT + USB_WEBUSB_INTERFACE_COUNT)
 
 
@@ -363,10 +370,20 @@ static uint16_t USBD_WEBUSB_Interface = 0xffff;
   USB_INTERFACE(INTERFACE_NUM, 0x02,  0xff,0x00,0x00,  0x06),		\
 									\
   /**** CDC Data Endpoint IN ****/					\
-  USB_ENDPOINT(WEBUSB_IN_EP, 0x02, CDC_DATA_FS_MAX_PACKET_SIZE, 0x00),		\
+  USB_ENDPOINT(WEBUSB_IN_EP, 0x02, CDC_DATA_FS_MAX_PACKET_SIZE, 0x00),	\
 									\
   /**** CDC Data Endpoint OUT ****/					\
   USB_ENDPOINT(WEBUSB_OUT_EP, 0x02, CDC_DATA_FS_MAX_PACKET_SIZE, 0x00)
+
+
+/* This dummy interface is used to make sure that interface 2 is
+ * always webusb a dummy or non-existant. This is helpful on windows
+ * as we can use zadig to assign the winusb driver to interface 2
+ * without accidentially overriding the device driver for other things.
+ */
+#define DUMMY_INTERFACE_DATA(INTERFACE_NUM)				\
+  /**** CDC Data Interface ****/					\
+  USB_INTERFACE(INTERFACE_NUM, 0x00,  0xff,0x00,0x00,  0x06)
 
 
 #define CDC_INTERFACES_DATA(INTERFACE_NUM)				\
@@ -395,18 +412,24 @@ static uint16_t USBD_WEBUSB_Interface = 0xffff;
   0x32                                                         /* bMaxPower */
 
 
-static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_1[USB_CDC_CONFIG_DESC_SIZ] =
+static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_1[] =
 {
   CONFIG_DESCRIPTOR_DATA(USB_CDC_CONFIG_DESC_SIZ, 2),
   CDC_INTERFACES_DATA(0),
 };
 
-static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_2[USB_CDC_MSC_CONFIG_DESC_SIZ] =
+ct_assert(sizeof(USBD_CDC_MSC_ConigurationDescriptor_1) == USB_CDC_CONFIG_DESC_SIZ);
+
+static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_2[] =
 {
-  CONFIG_DESCRIPTOR_DATA(USB_CDC_MSC_CONFIG_DESC_SIZ, 3),
+  CONFIG_DESCRIPTOR_DATA(USB_CDC_MSC_CONFIG_DESC_SIZ, 4),
   CDC_INTERFACES_DATA(0),
-  MSC_INTERFACE_DATA(2),
+  DUMMY_INTERFACE_DATA(2),
+  MSC_INTERFACE_DATA(3),
 };
+
+ct_assert(sizeof(USBD_CDC_MSC_ConigurationDescriptor_2) == USB_CDC_MSC_CONFIG_DESC_SIZ);
+
 
 #define USB_HID_REPORT_DESC_SIZ 101
 
@@ -469,24 +492,32 @@ static const uint8_t USBD_HID_ReportDescriptor[USB_HID_REPORT_DESC_SIZ] =
   0xc0,                          // END_COLLECTION
 };
 
-static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_3[USB_CDC_HID_CONFIG_DESC_SIZ] =
-{
-  CONFIG_DESCRIPTOR_DATA(USB_CDC_HID_CONFIG_DESC_SIZ, 3),
-  CDC_INTERFACES_DATA(0),
-  HID_INTERFACE_DATA(2),
-};
+ct_assert(sizeof(USBD_HID_ReportDescriptor) == USB_HID_REPORT_DESC_SIZ);
 
-static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_4[USB_CDC_MSC_HID_CONFIG_DESC_SIZ] =
+static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_3[] =
 {
-  CONFIG_DESCRIPTOR_DATA(USB_CDC_MSC_HID_CONFIG_DESC_SIZ, 4),
+  CONFIG_DESCRIPTOR_DATA(USB_CDC_HID_CONFIG_DESC_SIZ, 4),
   CDC_INTERFACES_DATA(0),
-  MSC_INTERFACE_DATA(2),
+  DUMMY_INTERFACE_DATA(2),
   HID_INTERFACE_DATA(3),
 };
 
+ct_assert(sizeof(USBD_CDC_MSC_ConigurationDescriptor_3) == USB_CDC_HID_CONFIG_DESC_SIZ);
+
+static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_4[] =
+{
+  CONFIG_DESCRIPTOR_DATA(USB_CDC_MSC_HID_CONFIG_DESC_SIZ, 4),
+  CDC_INTERFACES_DATA(0),
+  DUMMY_INTERFACE_DATA(2),
+  MSC_INTERFACE_DATA(3),
+  HID_INTERFACE_DATA(4),
+};
+
+ct_assert(sizeof(USBD_CDC_MSC_ConigurationDescriptor_4) == USB_CDC_MSC_HID_CONFIG_DESC_SIZ);
+
 #define USB_DAP_REPORT_DESC_SIZ 28
 
-static const uint8_t USBD_DAP_ReportDescriptor[USB_DAP_REPORT_DESC_SIZ] = 
+static const uint8_t USBD_DAP_ReportDescriptor[] = 
 {
   0x06, 0xc0, 0xff,                                            /* Usage Page */
   0x0a, 0x00, 0x0c,                                            /* Usage */
@@ -503,38 +534,85 @@ static const uint8_t USBD_DAP_ReportDescriptor[USB_DAP_REPORT_DESC_SIZ] =
   0xc0,                                                        /* End Collection */
 };
 
-static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_5[USB_CDC_HID_CONFIG_DESC_SIZ] =
-{
-  CONFIG_DESCRIPTOR_DATA(USB_CDC_HID_CONFIG_DESC_SIZ, 3),
-  CDC_INTERFACES_DATA(0),
-  HID_INTERFACE_DATA(2),
-};
+ct_assert(sizeof(USBD_DAP_ReportDescriptor) == USB_DAP_REPORT_DESC_SIZ);
 
-static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_6[USB_CDC_MSC_HID_CONFIG_DESC_SIZ] =
+static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_5[] =
 {
-  CONFIG_DESCRIPTOR_DATA(USB_CDC_MSC_HID_CONFIG_DESC_SIZ, 4),
+  CONFIG_DESCRIPTOR_DATA(USB_CDC_HID_CONFIG_DESC_SIZ, 4),
   CDC_INTERFACES_DATA(0),
-  MSC_INTERFACE_DATA(2),
+  DUMMY_INTERFACE_DATA(2),
   HID_INTERFACE_DATA(3),
 };
 
-static const uint8_t USBD_CDC_WEBUSB_ConigurationDescriptor_7[USB_CDC_WEBUSB_CONFIG_DESC_SIZ] =
+ct_assert(sizeof(USBD_CDC_MSC_ConigurationDescriptor_5) == USB_CDC_HID_CONFIG_DESC_SIZ);
+
+static const uint8_t USBD_CDC_MSC_ConigurationDescriptor_6[] =
+{
+  CONFIG_DESCRIPTOR_DATA(USB_CDC_MSC_HID_CONFIG_DESC_SIZ, 5),
+  CDC_INTERFACES_DATA(0),
+  DUMMY_INTERFACE_DATA(2),
+  MSC_INTERFACE_DATA(3),
+  HID_INTERFACE_DATA(4),
+};
+
+ct_assert(sizeof(USBD_CDC_MSC_ConigurationDescriptor_6) == USB_CDC_MSC_HID_CONFIG_DESC_SIZ);
+
+static const uint8_t USBD_CDC_WEBUSB_ConigurationDescriptor_7[] =
 {
   CONFIG_DESCRIPTOR_DATA(USB_CDC_WEBUSB_CONFIG_DESC_SIZ, 3),
   CDC_INTERFACES_DATA(0),
   WEBUSB_INTERFACE_DATA(2),
 };
 
-static const uint8_t USBD_CDC_MSC_WEBUSB_ConigurationDescriptor_8[USB_CDC_MSC_WEBUSB_CONFIG_DESC_SIZ] =
+ct_assert(sizeof(USBD_CDC_WEBUSB_ConigurationDescriptor_7) == USB_CDC_WEBUSB_CONFIG_DESC_SIZ);
+
+static const uint8_t USBD_CDC_MSC_WEBUSB_ConigurationDescriptor_8[] =
 {
   CONFIG_DESCRIPTOR_DATA(USB_CDC_MSC_WEBUSB_CONFIG_DESC_SIZ, 4),
   CDC_INTERFACES_DATA(0),
-  MSC_INTERFACE_DATA(2),
-  WEBUSB_INTERFACE_DATA(3),
+  WEBUSB_INTERFACE_DATA(2),
+  MSC_INTERFACE_DATA(3),
 };
+
+ct_assert(sizeof(USBD_CDC_MSC_WEBUSB_ConigurationDescriptor_8) == USB_CDC_MSC_WEBUSB_CONFIG_DESC_SIZ);
+
 
 static const uint8_t * USBD_CDC_MSC_ConigurationDescriptorData = NULL;
 static uint16_t USBD_CDC_MSC_ConigurationDescriptorLength = 0;
+
+#if 0
+#define DEFINE_MS_OS_20_DESCRIPTOR(INTERFACE_NUMBER)			\
+static const uint8_t MS_OS_20_DESCRIPTOR_##INTERFACE_NUMBER[] = {	\
+  /* Microsoft OS 2.0 descriptor set header (table 10) */		\
+  0x0A, 0x00,  /* Descriptor size (10 bytes) */				\
+  MS_OS_20_SET_HEADER_DESCRIPTOR, 0x00,  /* MS OS 2.0 descriptor set header */  \
+  0x00, 0x00, 0x03, 0x06,  /* Windows version (8.1) (0x06030000) */ \
+  MS_OS_20_DESCRIPTOR_LENGTH, 0x00,  /* Size, MS OS 2.0 descriptor set */ \
+									\
+  /* Microsoft OS 2.0 configuration subset header */	\
+  0x08, 0x00,  /* Descriptor size (8 bytes)	*/	\
+  MS_OS_20_SUBSET_HEADER_CONFIGURATION, 0x00,  /* MS OS 2.0 configuration subset header	*/  \
+  0x00,        /* bConfigurationValue	*/		\
+  0x00,        /* Reserved				*/	\
+  0xA8, 0x00,  /* Size, MS OS 2.0 configuration subset	*/ \
+									\
+  /* Microsoft OS 2.0 function subset header	*/	\
+  0x08, 0x00,  /* Descriptor size (8 bytes) */		\
+  MS_OS_20_SUBSET_HEADER_FUNCTION, 0x00,  /* MS OS 2.0 function subset header */  \
+  INTERFACE_NUMBER,							\
+  0x00,        /* Reserved */				\
+  0xA0, 0x00,  /* Size, MS OS 2.0 function subset */	\
+									\
+  /* Microsoft OS 2.0 compatible ID descriptor (table 13) */ \
+  0x14, 0x00,  /* wLength	*/				\
+  MS_OS_20_FEATURE_COMPATIBLE_ID, 0x00,  /* MS_OS_20_FEATURE_COMPATIBLE_ID */  \
+  'W',  'I',  'N',  'U',  'S',  'B',  0x00, 0x00,			\
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,			\
+}
+
+DEFINE_MS_OS_20_DESCRIPTOR(2);
+DEFINE_MS_OS_20_DESCRIPTOR(3);
+#endif
 
 /**
   * @}
@@ -795,7 +873,7 @@ void USBD_CDC_MSC_Initialize(USBD_HandleTypeDef *pdev)
   USBD_MSC_Class_Interface = &USBD_MSC_CLASS_Interface;
   USBD_HID_Class_Interface = NULL;
 
-  USBD_MSC_Interface = 2;
+  USBD_MSC_Interface = 3;
   USBD_HID_Interface = 0xffff;
 
   USBD_RegisterClass(pdev, &USBD_CDC_MSC_CLASS);
@@ -812,7 +890,7 @@ void USBD_CDC_HID_Initialize(USBD_HandleTypeDef *pdev)
   USBD_HID_Class_Interface = &USBD_HID_CLASS_Interface;
 
   USBD_MSC_Interface = 0xffff;
-  USBD_HID_Interface = 2;
+  USBD_HID_Interface = 3;
 
   USBD_RegisterClass(pdev, &USBD_CDC_MSC_CLASS);
   USBD_CDC_RegisterInterface(pdev, &stm32l4_usbd_cdc_interface);
@@ -827,8 +905,8 @@ void USBD_CDC_MSC_HID_Initialize(USBD_HandleTypeDef *pdev)
   USBD_MSC_Class_Interface = &USBD_MSC_CLASS_Interface;
   USBD_HID_Class_Interface = &USBD_HID_CLASS_Interface;
 
-  USBD_MSC_Interface = 2;
-  USBD_HID_Interface = 3;
+  USBD_MSC_Interface = 3;
+  USBD_HID_Interface = 4;
 
   USBD_RegisterClass(pdev, &USBD_CDC_MSC_CLASS);
   USBD_CDC_RegisterInterface(pdev, &stm32l4_usbd_cdc_interface);
@@ -847,7 +925,7 @@ void USBD_CDC_DAP_Initialize(USBD_HandleTypeDef *pdev)
   USBD_HID_Class_Interface = &USBD_HID_CLASS_Interface;
 
   USBD_MSC_Interface = 0xffff;
-  USBD_HID_Interface = 2;
+  USBD_HID_Interface = 3;
 
   USBD_RegisterClass(pdev, &USBD_CDC_MSC_CLASS);
   USBD_CDC_RegisterInterface(pdev, &stm32l4_usbd_cdc_interface);
@@ -864,8 +942,8 @@ void USBD_CDC_MSC_DAP_Initialize(USBD_HandleTypeDef *pdev)
   USBD_MSC_Class_Interface = &USBD_MSC_CLASS_Interface;
   USBD_HID_Class_Interface = &USBD_HID_CLASS_Interface;
 
-  USBD_MSC_Interface = 2;
-  USBD_HID_Interface = 3;
+  USBD_MSC_Interface = 3;
+  USBD_HID_Interface = 4;
 
   USBD_RegisterClass(pdev, &USBD_CDC_MSC_CLASS);
   USBD_CDC_RegisterInterface(pdev, &stm32l4_usbd_cdc_interface);
@@ -894,8 +972,8 @@ void USBD_CDC_MSC_WEBUSB_Initialize(USBD_HandleTypeDef *pdev)
   USBD_MSC_Class_Interface = &USBD_MSC_CLASS_Interface;
   USBD_WEBUSB_Class_Interface = &USBD_WEBUSB_CLASS_Interface;
 
-  USBD_MSC_Interface = 2;
-  USBD_WEBUSB_Interface = 3;
+  USBD_WEBUSB_Interface = 2;
+  USBD_MSC_Interface = 3;
 
   USBD_RegisterClass(pdev, &USBD_CDC_MSC_CLASS);
   USBD_CDC_RegisterInterface(pdev, &stm32l4_usbd_cdc_interface);
