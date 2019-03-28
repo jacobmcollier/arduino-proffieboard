@@ -99,5 +99,33 @@ bool USBDeviceClass::suspended()
 
 USBDeviceClass USBDevice;
 
+extern "C" {
+
+extern const uint8_t USBD_DeviceDescriptor[0x12] = {
+  0x12,                       /* bLength */
+  0x01,                       /* bDescriptorType */
+#if 0 // #ifdef USB_CLASS_WEBUSB  
+  0x01, 0x02,                 /* bcdUSB */
+#else
+  0x00, 0x02,                 /* bcdUSB */
+#endif  
+  0xef,                       /* bDeviceClass */
+  0x02,                       /* bDeviceSubClass */
+  0x01,                       /* bDeviceProtocol */
+  64,                         /* bMaxPacketSize */
+  LOBYTE(USB_VID),            /* idVendor */
+  HIBYTE(USB_VID),            /* idVendor */
+  LOBYTE(USB_PID),            /* idProduct */
+  HIBYTE(USB_PID),            /* idProduct */
+  0x00, 0x02,                 /* bcdDevice rel. 2.00 */
+  1,                          /* Index of manufacturer string */
+  2,                          /* Index of product string */
+  3,                          /* Index of serial number string */
+  1,                          /* bNumConfigurations */
+};
+
+
+}  // extern C
+
 #endif /* USBCON */
 

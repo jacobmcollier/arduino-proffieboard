@@ -86,25 +86,7 @@ extern uint16_t USBD_ProductID;
 extern const uint8_t * USBD_ManufacturerString;
 extern const uint8_t * USBD_ProductString;
 extern const uint8_t * USBD_SuffixString;
-
-static const uint8_t USBD_DeviceDescriptor[] = {
-  0x12,                       /* bLength */
-  0x01,                       /* bDescriptorType */ 
-  0x00, 0x02,                 /* bcdUSB */
-  0xef,                       /* bDeviceClass */
-  0x02,                       /* bDeviceSubClass */
-  0x01,                       /* bDeviceProtocol */
-  64,                         /* bMaxPacketSize */
-  0x00,                       /* idVendor */
-  0x00,                       /* idVendor */
-  0x00,                       /* idProduct */
-  0x00,                       /* idProduct */
-  0x00, 0x02,                 /* bcdDevice rel. 2.00 */
-  1,                          /* Index of manufacturer string */
-  2,                          /* Index of product string */
-  3,                          /* Index of serial number string */
-  1,                          /* bNumConfigurations */
-};
+extern const uint8_t USBD_DeviceDescriptor[0x12];
 
 /* USB Standard Device Descriptor */
 static const uint8_t USBD_LangIDDesc[USB_LEN_LANGID_STR_DESC] = {
@@ -159,15 +141,8 @@ static void USBD_AppendString(uint8_t *pbuf, const uint8_t *string)
   */
 const uint8_t *USBD_CDC_MSC_DeviceDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
-    memcpy(&USBD_StringData[0], &USBD_DeviceDescriptor[0], sizeof(USBD_DeviceDescriptor));
-
-    USBD_StringData[ 8] = LOBYTE(USBD_VendorID);
-    USBD_StringData[ 9] = HIBYTE(USBD_VendorID);
-    USBD_StringData[10] = LOBYTE(USBD_ProductID);
-    USBD_StringData[11] = HIBYTE(USBD_ProductID);
-  
-    *length = USBD_StringData[0];
-    return &USBD_StringData[0];
+    *length = USBD_DeviceDescriptor[0];
+    return USBD_DeviceDescriptor;
 }
 
 /**
