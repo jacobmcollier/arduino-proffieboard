@@ -93,7 +93,7 @@
 * @param  id: Low level core index
 * @retval None
 */
-USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef *pdev, const USBD_DescriptorsTypeDef *pdesc, uint8_t id)
+USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef *pdev, uint8_t id)
 {
   /* Check whether the USB Host handle is valid */
   if(pdev == NULL)
@@ -106,12 +106,6 @@ USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef *pdev, const USBD_DescriptorsTyp
   if(pdev->pClass != NULL)
   {
     pdev->pClass = NULL;
-  }
-  
-  /* Assign USBD Descriptors */
-  if(pdesc != NULL)
-  {
-    pdev->pDesc = pdesc;
   }
   
   /* Set Device initial State */

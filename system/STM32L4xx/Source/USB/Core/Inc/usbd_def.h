@@ -197,21 +197,6 @@ typedef enum {
   USBD_FAIL,
 }USBD_StatusTypeDef;
 
-/* USB Device descriptors structure */
-typedef struct
-{
-  const uint8_t  *(*GetDeviceDescriptor)( USBD_SpeedTypeDef speed , uint16_t *length);  
-  const uint8_t  *(*GetLangIDStrDescriptor)( USBD_SpeedTypeDef speed , uint16_t *length); 
-  const uint8_t  *(*GetManufacturerStrDescriptor)( USBD_SpeedTypeDef speed , uint16_t *length);  
-  const uint8_t  *(*GetProductStrDescriptor)( USBD_SpeedTypeDef speed , uint16_t *length);  
-  const uint8_t  *(*GetSerialStrDescriptor)( USBD_SpeedTypeDef speed , uint16_t *length);  
-  const uint8_t  *(*GetConfigurationStrDescriptor)( USBD_SpeedTypeDef speed , uint16_t *length);  
-  const uint8_t  *(*GetInterfaceStrDescriptor)( USBD_SpeedTypeDef speed , uint16_t *length); 
-#if (USBD_LPM_ENABLED == 1)
-  const uint8_t  *(*GetBOSDescriptor)( USBD_SpeedTypeDef speed , uint16_t *length); 
-#endif  
-} USBD_DescriptorsTypeDef;
-
 /* USB Device handle structure */
 typedef struct
 { 
@@ -241,7 +226,6 @@ typedef struct _USBD_HandleTypeDef
   uint32_t                dev_remote_wakeup;
 
   USBD_SetupReqTypedef    request;
-  const USBD_DescriptorsTypeDef *pDesc;
   const USBD_ClassTypeDef *pClass;
   void                    *pClassData[4];  
   const void              *pUserData[4];    
@@ -309,6 +293,25 @@ typedef struct _USBD_HandleTypeDef
 /** @defgroup USBD_DEF_Exported_FunctionsPrototype
   * @{
   */ 
+
+/**
+  * @}
+  */ 
+
+/** @defgroup USBD_DEF_Required_functions
+  * @{
+  */ 
+
+const uint8_t *USBD_F_DeviceDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
+const uint8_t *USBD_F_LangIDStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
+const uint8_t *USBD_F_ManufacturerStrDescriptor (USBD_SpeedTypeDef speed, uint16_t *length);
+const uint8_t *USBD_F_ProductStrDescriptor (USBD_SpeedTypeDef speed, uint16_t *length);
+const uint8_t *USBD_F_SerialStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
+const uint8_t *USBD_F_ConfigStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
+const uint8_t *USBD_F_InterfaceStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
+#ifdef USB_SUPPORT_USER_STRING_DESC
+const uint8_t *USBD_F_USRStringDesc (USBD_SpeedTypeDef speed, uint8_t idx, uint16_t *length);  
+#endif /* USB_SUPPORT_USER_STRING_DESC */  
 
 /**
   * @}

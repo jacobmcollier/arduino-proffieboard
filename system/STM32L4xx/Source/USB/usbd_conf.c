@@ -105,7 +105,7 @@ static void USBD_VBUSCallback(void)
 		{
 		    usbd_connected = true;
 			
-		    USBD_Init(&USBD_Device, &CDC_MSC_Desc, 0);
+		    USBD_Init(&USBD_Device, 0);
 			
 		    (*USBD_ClassInitialize)(&USBD_Device);
 			
@@ -220,7 +220,7 @@ void USBD_Attach(void)
 	{
 	    usbd_connected = true;
 
-	    USBD_Init(&USBD_Device, &CDC_MSC_Desc, 0);
+	    USBD_Init(&USBD_Device, 0);
 	    
 	    (*USBD_ClassInitialize)(&USBD_Device);
 

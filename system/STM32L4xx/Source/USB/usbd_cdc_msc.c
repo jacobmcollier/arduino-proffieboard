@@ -165,7 +165,7 @@ static const USBD_ClassTypeDef  USBD_CDC_MSC_CLASS =
   USBD_CDC_MSC_GetOtherSpeedCfgDesc, 
   USBD_CDC_MSC_GetDeviceQualifierDescriptor,
 #if (USBD_SUPPORT_USER_STRING == 1)
-  USBD_CDC_MSC_GetUsrStrDescriptor,
+  USBD_F_GetUsrStrDescriptor,
 #endif  
 };
 

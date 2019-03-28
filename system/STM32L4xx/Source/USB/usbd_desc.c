@@ -57,27 +57,18 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-const uint8_t *USBD_CDC_MSC_DeviceDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
-const uint8_t *USBD_CDC_MSC_LangIDStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
-const uint8_t *USBD_CDC_MSC_ManufacturerStrDescriptor (USBD_SpeedTypeDef speed, uint16_t *length);
-const uint8_t *USBD_CDC_MSC_ProductStrDescriptor (USBD_SpeedTypeDef speed, uint16_t *length);
-const uint8_t *USBD_CDC_MSC_SerialStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
-const uint8_t *USBD_CDC_MSC_ConfigStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
-const uint8_t *USBD_CDC_MSC_InterfaceStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
+const uint8_t *USBD_F_DeviceDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
+const uint8_t *USBD_F_LangIDStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
+const uint8_t *USBD_F_ManufacturerStrDescriptor (USBD_SpeedTypeDef speed, uint16_t *length);
+const uint8_t *USBD_F_ProductStrDescriptor (USBD_SpeedTypeDef speed, uint16_t *length);
+const uint8_t *USBD_F_SerialStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
+const uint8_t *USBD_F_ConfigStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
+const uint8_t *USBD_F_InterfaceStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
 #ifdef USB_SUPPORT_USER_STRING_DESC
-const uint8_t *USBD_CDC_MSC_USRStringDesc (USBD_SpeedTypeDef speed, uint8_t idx, uint16_t *length);  
+const uint8_t *USBD_F_USRStringDesc (USBD_SpeedTypeDef speed, uint8_t idx, uint16_t *length);  
 #endif /* USB_SUPPORT_USER_STRING_DESC */  
 
 /* Private variables ---------------------------------------------------------*/
-const USBD_DescriptorsTypeDef CDC_MSC_Desc = {
-  USBD_CDC_MSC_DeviceDescriptor,
-  USBD_CDC_MSC_LangIDStrDescriptor, 
-  USBD_CDC_MSC_ManufacturerStrDescriptor,
-  USBD_CDC_MSC_ProductStrDescriptor,
-  USBD_CDC_MSC_SerialStrDescriptor,
-  USBD_CDC_MSC_ConfigStrDescriptor,
-  USBD_CDC_MSC_InterfaceStrDescriptor,  
-};
 
 static uint8_t USBD_StringData[64];
 
@@ -86,7 +77,7 @@ extern uint16_t USBD_ProductID;
 extern const uint8_t * USBD_ManufacturerString;
 extern const uint8_t * USBD_ProductString;
 extern const uint8_t * USBD_SuffixString;
-extern const uint8_t USBD_DeviceDescriptor[0x12];
+extern const uint8_t USBD_DeviceDescriptor[];
 
 /* USB Standard Device Descriptor */
 static const uint8_t USBD_LangIDDesc[USB_LEN_LANGID_STR_DESC] = {
@@ -139,7 +130,7 @@ static void USBD_AppendString(uint8_t *pbuf, const uint8_t *string)
   * @param  length: Pointer to data length variable
   * @retval Pointer to descriptor buffer
   */
-const uint8_t *USBD_CDC_MSC_DeviceDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
+const uint8_t *USBD_F_DeviceDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
     *length = USBD_DeviceDescriptor[0];
     return USBD_DeviceDescriptor;
@@ -151,7 +142,7 @@ const uint8_t *USBD_CDC_MSC_DeviceDescriptor(USBD_SpeedTypeDef speed, uint16_t *
   * @param  length: Pointer to data length variable
   * @retval Pointer to descriptor buffer
   */
-const uint8_t *USBD_CDC_MSC_LangIDStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
+const uint8_t *USBD_F_LangIDStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
   *length = USBD_LangIDDesc[0];  
   return USBD_LangIDDesc;
@@ -163,7 +154,7 @@ const uint8_t *USBD_CDC_MSC_LangIDStrDescriptor(USBD_SpeedTypeDef speed, uint16_
   * @param  length: Pointer to data length variable
   * @retval Pointer to descriptor buffer
   */
-const uint8_t *USBD_CDC_MSC_ManufacturerStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
+const uint8_t *USBD_F_ManufacturerStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
     USBD_ConvertString(USBD_StringData, USBD_ManufacturerString);
 
@@ -177,7 +168,7 @@ const uint8_t *USBD_CDC_MSC_ManufacturerStrDescriptor(USBD_SpeedTypeDef speed, u
   * @param  length: Pointer to data length variable
   * @retval Pointer to descriptor buffer
   */
-const uint8_t *USBD_CDC_MSC_ProductStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
+const uint8_t *USBD_F_ProductStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
     USBD_ConvertString(USBD_StringData, USBD_ProductString);
 
@@ -195,7 +186,7 @@ const uint8_t *USBD_CDC_MSC_ProductStrDescriptor(USBD_SpeedTypeDef speed, uint16
   * @param  length: Pointer to data length variable
   * @retval Pointer to descriptor buffer
   */
-const uint8_t *USBD_CDC_MSC_SerialStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
+const uint8_t *USBD_F_SerialStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
     /* Update the serial number string descriptor with the data from the unique ID*/
     Get_SerialNum();
@@ -210,9 +201,9 @@ const uint8_t *USBD_CDC_MSC_SerialStrDescriptor(USBD_SpeedTypeDef speed, uint16_
   * @param  length: Pointer to data length variable
   * @retval Pointer to descriptor buffer
   */
-const uint8_t *USBD_CDC_MSC_ConfigStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
+const uint8_t *USBD_F_ConfigStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
-  return USBD_CDC_MSC_GetUsrStrDescriptor(NULL, USBD_IDX_CONFIG_STR, length);
+  return USBD_F_GetUsrStrDescriptor(NULL, USBD_IDX_CONFIG_STR, length);
 }
 
 /**
@@ -221,9 +212,9 @@ const uint8_t *USBD_CDC_MSC_ConfigStrDescriptor(USBD_SpeedTypeDef speed, uint16_
   * @param  length: Pointer to data length variable
   * @retval Pointer to descriptor buffer
   */
-const uint8_t *USBD_CDC_MSC_InterfaceStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
+const uint8_t *USBD_F_InterfaceStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
-  return USBD_CDC_MSC_GetUsrStrDescriptor(NULL, USBD_IDX_INTERFACE_STR, length);
+  return USBD_F_GetUsrStrDescriptor(NULL, USBD_IDX_INTERFACE_STR, length);
 }
 
 static const char *USBD_StringTable[] = {
@@ -235,7 +226,7 @@ static const char *USBD_StringTable[] = {
   "CMSIS-DAP",        // 9
 };
 
-const uint8_t *USBD_CDC_MSC_GetUsrStrDescriptor(USBD_HandleTypeDef *pdev, uint8_t index, uint16_t *length)  
+const uint8_t *USBD_F_GetUsrStrDescriptor(USBD_HandleTypeDef *pdev, uint8_t index, uint16_t *length)  
 {
   USBD_ConvertString(USBD_StringData, (const uint8_t*)USBD_StringTable[index-4]);
 

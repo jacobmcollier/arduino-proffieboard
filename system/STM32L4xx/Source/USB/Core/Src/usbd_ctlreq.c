@@ -339,11 +339,11 @@ static void USBD_GetDescriptor(USBD_HandleTypeDef *pdev ,
   { 
 #if (USBD_LPM_ENABLED == 1)
   case USB_DESC_TYPE_BOS:
-    pbuf = pdev->pDesc->GetBOSDescriptor(pdev->dev_speed, &len);
+    pbuf = USBD_F_BOSDescriptor(pdev->dev_speed, &len);
     break;
 #endif    
   case USB_DESC_TYPE_DEVICE:
-    pbuf = pdev->pDesc->GetDeviceDescriptor(pdev->dev_speed, &len);
+    pbuf = USBD_F_DeviceDescriptor(pdev->dev_speed, &len);
     break;
     
   case USB_DESC_TYPE_CONFIGURATION:     
@@ -361,27 +361,27 @@ static void USBD_GetDescriptor(USBD_HandleTypeDef *pdev ,
     switch ((uint8_t)(req->wValue))
     {
     case USBD_IDX_LANGID_STR:
-     pbuf = pdev->pDesc->GetLangIDStrDescriptor(pdev->dev_speed, &len);        
+     pbuf = USBD_F_LangIDStrDescriptor(pdev->dev_speed, &len);        
       break;
       
     case USBD_IDX_MFC_STR:
-      pbuf = pdev->pDesc->GetManufacturerStrDescriptor(pdev->dev_speed, &len);
+      pbuf = USBD_F_ManufacturerStrDescriptor(pdev->dev_speed, &len);
       break;
       
     case USBD_IDX_PRODUCT_STR:
-      pbuf = pdev->pDesc->GetProductStrDescriptor(pdev->dev_speed, &len);
+      pbuf = USBD_F_ProductStrDescriptor(pdev->dev_speed, &len);
       break;
       
     case USBD_IDX_SERIAL_STR:
-      pbuf = pdev->pDesc->GetSerialStrDescriptor(pdev->dev_speed, &len);
+      pbuf = USBD_F_SerialStrDescriptor(pdev->dev_speed, &len);
       break;
       
     case USBD_IDX_CONFIG_STR:
-      pbuf = pdev->pDesc->GetConfigurationStrDescriptor(pdev->dev_speed, &len);
+      pbuf = USBD_F_ConfigStrDescriptor(pdev->dev_speed, &len);
       break;
       
     case USBD_IDX_INTERFACE_STR:
-      pbuf = pdev->pDesc->GetInterfaceStrDescriptor(pdev->dev_speed, &len);
+      pbuf = USBD_F_InterfaceStrDescriptor(pdev->dev_speed, &len);
       break;
       
     default:
