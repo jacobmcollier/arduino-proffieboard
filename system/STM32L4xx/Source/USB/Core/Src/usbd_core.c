@@ -495,39 +495,6 @@ USBD_StatusTypeDef USBD_LL_SOF(USBD_HandleTypeDef  *pdev)
 }
 
 /**
-* @brief  USBD_IsoINIncomplete 
-*         Handle iso in incomplete event
-* @param  pdev: device instance
-* @retval status
-*/
-USBD_StatusTypeDef USBD_LL_IsoINIncomplete(USBD_HandleTypeDef  *pdev, uint8_t epnum)
-{
-  return USBD_OK;
-}
-
-/**
-* @brief  USBD_IsoOUTIncomplete 
-*         Handle iso out incomplete event
-* @param  pdev: device instance
-* @retval status
-*/
-USBD_StatusTypeDef USBD_LL_IsoOUTIncomplete(USBD_HandleTypeDef  *pdev, uint8_t epnum)
-{
-  return USBD_OK;
-}
-
-/**
-* @brief  USBD_DevConnected 
-*         Handle device connection event
-* @param  pdev: device instance
-* @retval status
-*/
-USBD_StatusTypeDef USBD_LL_DevConnected(USBD_HandleTypeDef  *pdev)
-{
-  return USBD_OK;
-}
-
-/**
 * @brief  USBD_DevDisconnected 
 *         Handle device disconnection event
 * @param  pdev: device instance

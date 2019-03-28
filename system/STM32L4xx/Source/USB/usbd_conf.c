@@ -501,38 +501,6 @@ void HAL_PCD_ResumeCallback(PCD_HandleTypeDef *hpcd)
 }
 
 /**
-  * @brief  ISOOUTIncomplete callback.
-  * @param  hpcd: PCD handle 
-  * @param  epnum: Endpoint Number
-  * @retval None
-  */
-void HAL_PCD_ISOOUTIncompleteCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
-{
-  USBD_LL_IsoOUTIncomplete(hpcd->pData, epnum);
-}
-
-/**
-  * @brief  ISOINIncomplete callback.
-  * @param  hpcd: PCD handle 
-  * @param  epnum: Endpoint Number
-  * @retval None
-  */
-void HAL_PCD_ISOINIncompleteCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
-{
-  USBD_LL_IsoINIncomplete(hpcd->pData, epnum);
-}
-
-/**
-  * @brief  ConnectCallback callback.
-  * @param  hpcd: PCD handle
-  * @retval None
-  */
-void HAL_PCD_ConnectCallback(PCD_HandleTypeDef *hpcd)
-{
-  USBD_LL_DevConnected(hpcd->pData);
-}
-
-/**
   * @brief  Disconnect callback.
   * @param  hpcd: PCD handle
   * @retval None

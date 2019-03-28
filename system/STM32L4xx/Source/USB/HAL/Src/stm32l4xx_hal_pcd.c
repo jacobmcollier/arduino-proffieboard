@@ -718,21 +718,21 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd)
     /* Handle Incomplete ISO IN Interrupt */
     if(__HAL_PCD_GET_FLAG(hpcd, USB_OTG_GINTSTS_IISOIXFR))
     {
-      HAL_PCD_ISOINIncompleteCallback(hpcd, epnum);
+      /* HAL_PCD_ISOINIncompleteCallback(hpcd, epnum); */
       __HAL_PCD_CLEAR_FLAG(hpcd, USB_OTG_GINTSTS_IISOIXFR);
     } 
     
     /* Handle Incomplete ISO OUT Interrupt */
     if(__HAL_PCD_GET_FLAG(hpcd, USB_OTG_GINTSTS_PXFR_INCOMPISOOUT))
     {
-      HAL_PCD_ISOOUTIncompleteCallback(hpcd, epnum);
+      /* HAL_PCD_ISOOUTIncompleteCallback(hpcd, epnum); */
       __HAL_PCD_CLEAR_FLAG(hpcd, USB_OTG_GINTSTS_PXFR_INCOMPISOOUT);
     } 
     
     /* Handle Connection event Interrupt */
     if(__HAL_PCD_GET_FLAG(hpcd, USB_OTG_GINTSTS_SRQINT))
     {
-      HAL_PCD_ConnectCallback(hpcd);
+      /* HAL_PCD_ConnectCallback(hpcd); */
       __HAL_PCD_CLEAR_FLAG(hpcd, USB_OTG_GINTSTS_SRQINT);
     } 
     
@@ -977,55 +977,6 @@ __weak void HAL_PCD_ResumeCallback(PCD_HandleTypeDef *hpcd)
 
   /* NOTE : This function should not be modified, when the callback is needed,
             the HAL_PCD_ResumeCallback could be implemented in the user file
-   */ 
-}
-
-/**
-  * @brief  Incomplete ISO OUT callback.
-  * @param  hpcd: PCD handle
-  * @param  epnum: endpoint number
-  * @retval None
-  */
-__weak void HAL_PCD_ISOOUTIncompleteCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
-{
-  /* Prevent unused argument(s) compilation warning */
-  UNUSED(hpcd);
-  UNUSED(epnum);
-
-  /* NOTE : This function should not be modified, when the callback is needed,
-            the HAL_PCD_ISOOUTIncompleteCallback could be implemented in the user file
-   */ 
-}
-
-/**
-  * @brief  Incomplete ISO IN callback.
-  * @param  hpcd: PCD handle
-  * @param  epnum: endpoint number
-  * @retval None
-  */
-__weak void HAL_PCD_ISOINIncompleteCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
-{
-  /* Prevent unused argument(s) compilation warning */
-  UNUSED(hpcd);
-  UNUSED(epnum);
-
-  /* NOTE : This function should not be modified, when the callback is needed,
-            the HAL_PCD_ISOINIncompleteCallback could be implemented in the user file
-   */ 
-}
-
-/**
-  * @brief  Connection event callback.
-  * @param  hpcd: PCD handle
-  * @retval None
-  */
-__weak void HAL_PCD_ConnectCallback(PCD_HandleTypeDef *hpcd)
-{
-  /* Prevent unused argument(s) compilation warning */
-  UNUSED(hpcd);
-
-  /* NOTE : This function should not be modified, when the callback is needed,
-            the HAL_PCD_ConnectCallback could be implemented in the user file
    */ 
 }
 
