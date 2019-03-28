@@ -209,7 +209,6 @@ typedef struct
 /* USB Device handle structure */
 typedef struct _USBD_HandleTypeDef
 {
-  uint8_t                 id;
   uint32_t                dev_config;
   uint32_t                dev_default_config;
   uint32_t                dev_config_status; 

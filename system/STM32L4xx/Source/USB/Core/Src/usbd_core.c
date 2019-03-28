@@ -93,7 +93,7 @@
 * @param  id: Low level core index
 * @retval None
 */
-USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef *pdev, uint8_t id)
+USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef *pdev)
 {
   /* Check whether the USB Host handle is valid */
   if(pdev == NULL)
@@ -110,7 +110,6 @@ USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef *pdev, uint8_t id)
   
   /* Set Device initial State */
   pdev->dev_state  = USBD_STATE_DEFAULT;
-  pdev->id = id;
   /* Initialize low level driver */
   USBD_LL_Init(pdev);
   
