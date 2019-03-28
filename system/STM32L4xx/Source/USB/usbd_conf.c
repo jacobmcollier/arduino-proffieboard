@@ -73,8 +73,6 @@ static void (*usbd_resume_callback)(void) = NULL;
 
 /* Private functions ---------------------------------------------------------*/
 
-uint16_t USBD_VendorID;
-uint16_t USBD_ProductID;
 const uint8_t * USBD_ManufacturerString = NULL;
 const uint8_t * USBD_ProductString = NULL;
 const uint8_t * USBD_SuffixString = NULL;
@@ -155,12 +153,10 @@ static void USBD_VBUSCallback(void)
     armv7m_timer_start(&USBD_VBUSTimer, timeout);
 }
 
-void USBD_Initialize(uint16_t vid, uint16_t pid, const uint8_t *manufacturer, const uint8_t *product, void(*initialize)(struct _USBD_HandleTypeDef *), unsigned int pin_vbus, unsigned int priority)
+void USBD_Initialize(const uint8_t *manufacturer, const uint8_t *product, void(*initialize)(struct _USBD_HandleTypeDef *), unsigned int pin_vbus, unsigned int priority)
 {
     USBD_IRQHandler = HAL_PCD_IRQHandler;
 
-    USBD_VendorID = vid;
-    USBD_ProductID = pid;
     USBD_ManufacturerString = manufacturer;
     USBD_ProductString = product;
     USBD_ClassInitialize = initialize;

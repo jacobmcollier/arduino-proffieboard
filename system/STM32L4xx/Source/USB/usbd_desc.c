@@ -72,8 +72,6 @@ const uint8_t *USBD_F_USRStringDesc (USBD_SpeedTypeDef speed, uint8_t idx, uint1
 
 static uint8_t USBD_StringData[64];
 
-extern uint16_t USBD_VendorID;
-extern uint16_t USBD_ProductID;
 extern const uint8_t * USBD_ManufacturerString;
 extern const uint8_t * USBD_ProductString;
 extern const uint8_t * USBD_SuffixString;
