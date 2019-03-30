@@ -157,8 +157,8 @@
           },
           "url": "https://github.com/profezzorn/arduino-proffieboard/archive/v0.1.6.tar.gz",
           "archiveFileName": "arduino-proffieboard-v0.1.6.tar.gz",
-          "checksum": "MD5:f6a5329fce19cdcfd2131ca1be9948ad",
-          "size": "16590328",
+          "checksum": "MD5:b4784218d97abf73d2fea892c9d47e69",
+          "size": "16595352",
           "boards": [
             {"name": "Proffieboard"}
           ],
