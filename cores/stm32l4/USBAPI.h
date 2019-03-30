@@ -82,6 +82,19 @@
 #define USB_CLASS_CDC
 #define USB_CLASS_MSC
 #define USB_CLASS_WEBUSB
+
+template<int LEN>
+struct __attribute__((packed)) WebUSBLandingPage {
+  uint8_t length, descriptor_type, https;
+  char url[LEN];
+};
+
+// For internal use
+#define SetWebUSBLandingPage2(HTTPS, STR, ATTRS)				\
+WebUSBLandingPage<sizeof(STR)> WEBUSB_landingpage ATTRS = { sizeof(STR) - sizeof("") + 3, 3, HTTPS, STR }
+
+// Use this one
+#define SetWebUSBLandingPage(HTTPS, STR)  SetWebUsbLandingPate2(HTTPS,STR,ATTRS)
 #endif
 
 

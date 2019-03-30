@@ -75,6 +75,8 @@
 #define  USB_REQ_TYPE_VENDOR                            0x40
 #define  USB_REQ_TYPE_MASK                              0x60
 
+#define  USB_REQ_DEVICETOHOST                           0x80
+
 #define  USB_REQ_RECIPIENT_DEVICE                       0x00
 #define  USB_REQ_RECIPIENT_INTERFACE                    0x01
 #define  USB_REQ_RECIPIENT_ENDPOINT                     0x02

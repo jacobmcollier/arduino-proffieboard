@@ -99,15 +99,33 @@ static void USBD_ClrFeature(USBD_HandleTypeDef *pdev ,
 
 static uint8_t USBD_GetLen(const uint8_t *buf);
 
-/**
-  * @}
-  */ 
+#define USB_BOS_DESCRIPTOR_TYPE		15
+#define WEBUSB_REQUEST_GET_URL		0x02
+#define MS_OS_20_REQUEST_DESCRIPTOR 0x07
+
+__weak const uint8_t *USBD_WEBUSB_LandingPageDescriptor(uint16_t *length) { return NULL; } 
+__weak const uint8_t *USBD_WEBUSB_MS_OS_20_DESCRIPTOR(uint16_t *length) { return NULL; } 
 
 
-/** @defgroup USBD_REQ_Private_Functions
-  * @{
-  */ 
-
+/* TODO: Make this function disappear when there is no WEBUSB interface */
+uint8_t USBD_VENDOR_Setup(USBD_HandleTypeDef *pdev, 
+			  USBD_SetupReqTypedef *req) {
+  uint16_t len = 0;
+  const uint8_t *pbuf = NULL;
+  if (req->bmRequest == (USB_REQ_DEVICETOHOST | USB_REQ_RECIPIENT_DEVICE | USB_REQ_TYPE_VENDOR)) {
+    if (req->bRequest == 0x01 && req->wIndex == WEBUSB_REQUEST_GET_URL) {
+      pbuf = USBD_WEBUSB_LandingPageDescriptor(&len);
+    }
+    if (req->bRequest == 0x02 && req->wIndex == MS_OS_20_REQUEST_DESCRIPTOR) {
+      pbuf = USBD_WEBUSB_MS_OS_20_DESCRIPTOR(&len);
+    }
+  }
+  if((len != 0)&& (req->wLength != 0)) {
+    len = MIN(len , req->wLength);
+    USBD_CtlSendData (pdev, (uint8_t*)pbuf, len);
+  }
+  return USBD_OK;
+}
 
 /**
 * @brief  USBD_StdDevReq
@@ -120,10 +138,15 @@ USBD_StatusTypeDef  USBD_StdDevReq (USBD_HandleTypeDef *pdev , USBD_SetupReqType
 {
   USBD_StatusTypeDef ret = USBD_OK;  
   
+  /* Check if it is a vendor specific request */
+  if ((req->bmRequest & USB_REQ_TYPE_MASK) == USB_REQ_TYPE_VENDOR)
+  {
+    return USBD_VENDOR_Setup(pdev, req);
+  }
+  
   switch (req->bRequest) 
   {
   case USB_REQ_GET_DESCRIPTOR: 
-    
     USBD_GetDescriptor (pdev, req) ;
     break;
     
@@ -213,7 +236,7 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
   ep_addr  = LOBYTE(req->wIndex);   
   
   /* Check if it is a class request */
-  if ((req->bmRequest & 0x60) == 0x20)
+  if ((req->bmRequest & USB_REQ_TYPE_MASK) == USB_REQ_TYPE_CLASS)
   {
     pdev->pClass->Setup (pdev, req);
     
@@ -321,6 +344,11 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
   }
   return ret;
 }
+
+__weak const uint8_t *USBD_F_BOSDescriptor(uint16_t *length) {
+  return NULL;
+}
+
 /**
 * @brief  USBD_GetDescriptor
 *         Handle Get Descriptor requests
@@ -337,12 +365,11 @@ static void USBD_GetDescriptor(USBD_HandleTypeDef *pdev ,
     
   switch (req->wValue >> 8)
   { 
-#if (USBD_LPM_ENABLED == 1)
-  case USB_DESC_TYPE_BOS:
-    pbuf = USBD_F_BOSDescriptor(pdev->dev_speed, &len);
-    break;
-#endif    
-  case USB_DESC_TYPE_DEVICE:
+    case USB_DESC_TYPE_BOS:
+      pbuf = USBD_F_BOSDescriptor(&len);
+      break;
+
+    case USB_DESC_TYPE_DEVICE:
     pbuf = USBD_F_DeviceDescriptor(pdev->dev_speed, &len);
     break;
     

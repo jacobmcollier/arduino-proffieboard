@@ -580,40 +580,6 @@ ct_assert(sizeof(USBD_CDC_MSC_WEBUSB_ConigurationDescriptor_8) == USB_CDC_MSC_WE
 static const uint8_t * USBD_CDC_MSC_ConigurationDescriptorData = NULL;
 static uint16_t USBD_CDC_MSC_ConigurationDescriptorLength = 0;
 
-#if 0
-#define DEFINE_MS_OS_20_DESCRIPTOR(INTERFACE_NUMBER)			\
-static const uint8_t MS_OS_20_DESCRIPTOR_##INTERFACE_NUMBER[] = {	\
-  /* Microsoft OS 2.0 descriptor set header (table 10) */		\
-  0x0A, 0x00,  /* Descriptor size (10 bytes) */				\
-  MS_OS_20_SET_HEADER_DESCRIPTOR, 0x00,  /* MS OS 2.0 descriptor set header */  \
-  0x00, 0x00, 0x03, 0x06,  /* Windows version (8.1) (0x06030000) */ \
-  MS_OS_20_DESCRIPTOR_LENGTH, 0x00,  /* Size, MS OS 2.0 descriptor set */ \
-									\
-  /* Microsoft OS 2.0 configuration subset header */	\
-  0x08, 0x00,  /* Descriptor size (8 bytes)	*/	\
-  MS_OS_20_SUBSET_HEADER_CONFIGURATION, 0x00,  /* MS OS 2.0 configuration subset header	*/  \
-  0x00,        /* bConfigurationValue	*/		\
-  0x00,        /* Reserved				*/	\
-  0xA8, 0x00,  /* Size, MS OS 2.0 configuration subset	*/ \
-									\
-  /* Microsoft OS 2.0 function subset header	*/	\
-  0x08, 0x00,  /* Descriptor size (8 bytes) */		\
-  MS_OS_20_SUBSET_HEADER_FUNCTION, 0x00,  /* MS OS 2.0 function subset header */  \
-  INTERFACE_NUMBER,							\
-  0x00,        /* Reserved */				\
-  0xA0, 0x00,  /* Size, MS OS 2.0 function subset */	\
-									\
-  /* Microsoft OS 2.0 compatible ID descriptor (table 13) */ \
-  0x14, 0x00,  /* wLength	*/				\
-  MS_OS_20_FEATURE_COMPATIBLE_ID, 0x00,  /* MS_OS_20_FEATURE_COMPATIBLE_ID */  \
-  'W',  'I',  'N',  'U',  'S',  'B',  0x00, 0x00,			\
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,			\
-}
-
-DEFINE_MS_OS_20_DESCRIPTOR(2);
-DEFINE_MS_OS_20_DESCRIPTOR(3);
-#endif
-
 /**
   * @}
   */ 
@@ -672,6 +638,7 @@ static uint8_t  USBD_CDC_MSC_DeInit (USBD_HandleTypeDef *pdev,
 static uint8_t  USBD_CDC_MSC_Setup (USBD_HandleTypeDef *pdev, 
 				    USBD_SetupReqTypedef *req)
 {
+
   switch (req->bmRequest & USB_REQ_RECIPIENT_MASK)
     {
     case USB_REQ_RECIPIENT_INTERFACE:
