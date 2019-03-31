@@ -82,6 +82,9 @@
 #define USB_CLASS_CDC
 #define USB_CLASS_MSC
 #define USB_CLASS_WEBUSB
+#endif
+
+#ifdef USB_CLASS_WEBUSB
 
 template<int LEN>
 struct __attribute__((packed)) WebUSBLandingPage {
@@ -95,6 +98,7 @@ WebUSBLandingPage<sizeof(STR)> WEBUSB_landingpage ATTRS = { sizeof(STR) - sizeof
 
 // Use this one
 #define SetWebUSBLandingPage(HTTPS, STR)  SetWebUsbLandingPate2(HTTPS,STR,ATTRS)
+
 #endif
 
 
