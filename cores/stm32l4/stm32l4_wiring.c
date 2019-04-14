@@ -98,7 +98,7 @@ void HardFault_Handler (void) {
   
 void __attribute__((used)) HardFault_Handler_C(uint32_t *frame, uint32_t lr)
 {
-  volatile uint32_t pc = frame[6];
+  volatile uint32_t pc  __attribute__((unused)) = frame[6];
     while (1)
     {
 #if defined(USBCON)
