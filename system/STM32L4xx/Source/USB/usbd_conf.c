@@ -66,6 +66,7 @@ static PCD_HandleTypeDef hpcd;
 
 static unsigned int usbd_pin_vbus;
 static unsigned int usbd_pin_vbus_count = 0;
+static volatile int usbd_sof_countdown = 0;
 static bool usbd_connected = false;
 static void (*usbd_sof_callback)(void) = NULL;
 static void (*usbd_suspend_callback)(void) = NULL;
@@ -110,6 +111,7 @@ static void USBD_VBUSCallback(void)
 		    USBD_Start(&USBD_Device);
 			
 		    timeout = 50;
+		    usbd_sof_countdown = 60; // 50ms * 60 = 3 seconds
 		}
 		else
 		{
@@ -132,6 +134,13 @@ static void USBD_VBUSCallback(void)
     }
     else
     {
+      if (usbd_sof_countdown > 0) {
+	usbd_sof_countdown--;
+      } else {
+	// No sof in 500ms, kill USB
+	state = 0;
+      }
+
 	if (!state)
 	{
 #if defined(STM32L476xx) || defined(STM32L496xx)
@@ -435,6 +444,7 @@ void HAL_PCD_DataInStageCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
   */
 void HAL_PCD_SOFCallback(PCD_HandleTypeDef *hpcd)
 {
+  usbd_sof_countdown = 10;
   USBD_LL_SOF(hpcd->pData);
 
   if (usbd_sof_callback) {
