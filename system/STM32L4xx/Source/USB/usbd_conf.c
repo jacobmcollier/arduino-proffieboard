@@ -65,7 +65,7 @@
 static PCD_HandleTypeDef hpcd;
 
 static unsigned int usbd_pin_vbus;
-static unsigned int usbd_pin_vbus_count = 0;
+static int usbd_pin_vbus_count = 0;
 static volatile int usbd_sof_countdown = 0;
 static bool usbd_connected = false;
 static void (*usbd_sof_callback)(void) = NULL;
@@ -86,80 +86,57 @@ static USBD_HandleTypeDef USBD_Device;
 
 static armv7m_timer_t USBD_VBUSTimer;
 
-static void USBD_VBUSCallback(void)
-{
-    unsigned int state, timeout;
-
-    state = stm32l4_gpio_pin_read(usbd_pin_vbus);
-
-    if (!usbd_connected)
-    {
-	if (state)
-	{
-	    if (usbd_pin_vbus_count)
-	    {
-		usbd_pin_vbus_count--;
-		    
-		if (!usbd_pin_vbus_count)
-		{
-		    usbd_connected = true;
-			
-		    USBD_Init(&USBD_Device);
-			
-		    (*USBD_ClassInitialize)(&USBD_Device);
-			
-		    USBD_Start(&USBD_Device);
-			
-		    timeout = 50;
-		    usbd_sof_countdown = 60; // 50ms * 60 = 3 seconds
-		}
-		else
-		{
-		    timeout = 1;
-		}
-	    }
-	    else
-	    {
-		usbd_pin_vbus_count = 10;
-
-		timeout = 1;
-	    }
-	}
-	else
-	{
-	    usbd_pin_vbus_count = 0;
-		
-	    timeout = 50;
-	}
-    }
-    else
-    {
-      if (usbd_sof_countdown > 0) {
-	usbd_sof_countdown--;
+static void USBD_VBUSCallback(void) {
+  unsigned int vbus_detected, timeout;
+  
+  vbus_detected= stm32l4_gpio_pin_read(usbd_pin_vbus);
+  
+  if (!usbd_connected) {
+    if (vbus_detected) {
+      timeout = 1;
+      if (usbd_pin_vbus_count > 0) {
+	usbd_pin_vbus_count--;
       } else {
-	// No sof in 500ms, kill USB
-	state = 0;
-      }
-
-	if (!state)
-	{
-#if defined(STM32L476xx) || defined(STM32L496xx)
-	    NVIC_DisableIRQ(OTG_FS_IRQn);
-#else
-	    NVIC_DisableIRQ(USB_IRQn);
-#endif
-	    
-	    USBD_DeInit(&USBD_Device);
-	    
-	    usbd_connected = false;
+	if (SystemCoreClock >= 16000000) {
+	  usbd_connected = true;
+	  USBD_Init(&USBD_Device);
+	  (*USBD_ClassInitialize)(&USBD_Device);
+	  USBD_Start(&USBD_Device);
+	  timeout = 50;
+	  usbd_sof_countdown = 60; // 50ms * 60 = 3 seconds
 	}
-	
-	usbd_pin_vbus_count = 0;
-	
-	timeout = 100;
+      }
+    } else {
+      usbd_pin_vbus_count = 10;
+      timeout = 50;
     }
-
-    armv7m_timer_start(&USBD_VBUSTimer, timeout);
+  }
+  else
+  {
+    if (usbd_sof_countdown > 0) {
+      usbd_sof_countdown--;
+    } else {
+      // No sof in 500ms, kill USB
+      vbus_detected = 0;
+    }
+    
+    if (!vbus_detected)
+    {
+#if defined(STM32L476xx) || defined(STM32L496xx)
+      NVIC_DisableIRQ(OTG_FS_IRQn);
+#else
+      NVIC_DisableIRQ(USB_IRQn);
+#endif
+      
+      USBD_DeInit(&USBD_Device);
+      usbd_connected = false;
+    }
+    
+    usbd_pin_vbus_count = 10;
+    timeout = 100;
+  }
+  
+  armv7m_timer_start(&USBD_VBUSTimer, timeout);
 }
 
 void USBD_Initialize(const uint8_t *manufacturer, const uint8_t *product, void(*initialize)(struct _USBD_HandleTypeDef *), unsigned int pin_vbus, unsigned int priority)

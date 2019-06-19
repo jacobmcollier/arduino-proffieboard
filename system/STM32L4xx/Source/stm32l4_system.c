@@ -51,8 +51,8 @@ typedef struct _stm32l4_system_device_t {
     uint32_t                  hclk;
     uint32_t                  pclk1;
     uint32_t                  pclk2;
-    uint32_t                  saiclk; 
-    uint8_t                   clk48;
+    uint32_t                  saiclk;
+    uint8_t                   clk48; /* bitfield of systems using hsi48 clock */
     uint8_t                   mco;
     uint8_t                   lsco;
     uint8_t                   lsi;
@@ -1064,6 +1064,14 @@ bool stm32l4_system_sysclk_configure(uint32_t hclk, uint32_t pclk1, uint32_t pcl
     __disable_irq();
     
     if (stm32l4_system_device.lock[SYSTEM_LOCK_CLOCKS])
+    {
+	__set_PRIMASK(primask);
+	
+	return false;
+    }
+
+    /* USB doesn't like it below 16Mhz, so let's now allow that for now -Hubbe */
+    if ((stm32l4_system_device.clk48 & SYSTEM_CLK48_REFERENCE_USB) && hclk < 16000000)
     {
 	__set_PRIMASK(primask);
 	
