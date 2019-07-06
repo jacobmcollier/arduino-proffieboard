@@ -65,6 +65,8 @@
 #define DOSFS_CONFIG_SFLASH_SIMULATE_TRACE      0
 #define DOSFS_CONFIG_SFLASH_DEBUG               0
 
+#define DOSFS_CONFIG_STARTUP_DELAY              100
+
 #ifdef __cplusplus
 }
 #endif
