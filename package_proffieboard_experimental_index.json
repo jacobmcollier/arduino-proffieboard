@@ -54,7 +54,7 @@
               "version": "7-2017q4"
             }
           ]
-        }
+        },
         {
           "name": "Proffieboard Experimental",
           "architecture": "stm32l4",
