@@ -1,0 +1,41 @@
+{
+  "packages": [
+    {
+      "name": "k4935",
+      "maintainer": "Jacob Collier",
+      "websiteURL": "https://github.com/jacobmcollier/arduino-proffieboard",
+      "email": "hubbe@hubbe.net",
+      "help": {
+        "online": "https://github.com/jacobmcollier/arduino-proffieboard/issues"
+      },
+      "platforms": [
+        {
+          "name": "k4935",
+          "architecture": "stm32l4",
+          "version": "0.1",
+          "category": "Contributed",
+          "help": {
+            "online": "https://github.com/jacobmcollier/arduino-proffieboard/issues"
+          },
+          "url": "https://github.com/jacobmcollier/arduino-proffieboard/archive/v0.1.tar.gz",
+          "archiveFileName": "arduino-proffieboard-v0.1.tar.gz",
+          "checksum": "MD5:2ec47acbe144e2d52e8bb0a8ac6b597a",
+          "size": "16597565",
+          "boards": [
+            {"name": "k4935"},
+          ],
+          "toolsDependencies": [
+            {
+              "packager": "arduino",
+              "name": "arm-none-eabi-gcc",
+              "version": "4.8.3-2014q1"
+            }
+          ]
+        }
+	  
+      ],
+      "tools": [
+      ]
+    }
+  ]
+}
