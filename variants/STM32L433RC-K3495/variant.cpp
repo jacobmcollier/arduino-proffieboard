@@ -103,6 +103,11 @@ extern const unsigned int g_PWMInstances[PWM_INSTANCE_COUNT] = {
     TIMER_INSTANCE_TIM16,
 };
 
+// RX/TX, please use this one.
+extern const stm32l4_uart_pins_t g_SerialPins = { GPIO_PIN_PA15_USART2_RX, GPIO_PIN_PA2_USART2_TX, GPIO_PIN_NONE, GPIO_PIN_NONE };
+extern const unsigned int g_SerialInstance = UART_INSTANCE_USART2;
+extern const unsigned int g_SerialMode = UART_MODE_RX_DMA;
+
 // Serial1Pins is the same as Neopixels 2 & 3.
 extern const stm32l4_uart_pins_t g_Serial1Pins = { GPIO_PIN_PB11_USART3_RX, GPIO_PIN_PB10_USART3_TX, GPIO_PIN_NONE, GPIO_PIN_NONE };
 extern const unsigned int g_Serial1Instance = UART_INSTANCE_USART3;
@@ -112,11 +117,6 @@ extern const unsigned int g_Serial1Mode = UART_MODE_RX_DMA | UART_MODE_TX_DMA;
 extern const stm32l4_uart_pins_t g_Serial2Pins = { GPIO_PIN_PA10_USART1_RX, GPIO_PIN_PA9_USART1_TX, GPIO_PIN_NONE, GPIO_PIN_NONE };
 extern const unsigned int g_Serial2Instance = UART_INSTANCE_USART1;
 extern const unsigned int g_Serial2Mode = UART_MODE_RX_DMA | UART_MODE_TX_DMA;
-
-// RX/TX, please use this one.
-extern const stm32l4_uart_pins_t g_Serial3Pins = { GPIO_PIN_PA15_USART2_RX, GPIO_PIN_PA2_USART2_TX, GPIO_PIN_NONE, GPIO_PIN_NONE };
-extern const unsigned int g_Serial3Instance = UART_INSTANCE_USART2;
-extern const unsigned int g_Serial3Mode = UART_MODE_RX_DMA;
 
 // SD card
 extern const stm32l4_spi_pins_t g_SPIPins = { GPIO_PIN_PA7_SPI1_MOSI, GPIO_PIN_PA6_SPI1_MISO, GPIO_PIN_PA5_SPI1_SCK, GPIO_PIN_NONE };

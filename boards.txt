@@ -209,37 +209,11 @@ K3495-L433RC.build.pid=0x6668
 K3495-L433RC.build.did=0xffff
 K3495-L433RC.build.usb_manufacturer="hubbe.net"
 K3495-L433RC.build.usb_product="K3495"
-K3495-L433RC.build.extra_flags=-DSTM32L433xx -DPROFFIEBOARD_VERSION=2 -D__FPU_PRESENT=1 -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mabi=aapcs -mslow-flash-data -fsingle-precision-constant -felide-constructors -ffast-math {build.usb_flags} {build.dosfs_flags}
+K3495-L433RC.build.extra_flags=-DSTM32L433xx -DPROFFIEBOARD_VERSION=2 -D__FPU_PRESENT=1 -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mabi=aapcs -mslow-flash-data -fsingle-precision-constant -felide-constructors -ffast-math {build.usb_flags}
 K3495-L433RC.build.ldscript=linker_scripts/STM32L433RC_FLASH.ld
 K3495-L433RC.build.variant=STM32L433RC-K3495
 K3495-L433RC.build.variant_system_libs="-L{runtime.platform.path}/system/STM32L4xx/Lib" "-L{runtime.platform.path}/system/CMSIS/Lib" -lstm32l433 -larm_cortexM4lf_math
 K3495-L433RC.build.variant_system_include="-I{runtime.platform.path}/system/CMSIS/Include" "-I{runtime.platform.path}/system/CMSIS/Device/ST/STM32L4xx/Include" "-I{runtime.platform.path}/system/STM32L4xx/Include" 
-
-K3495-L433RC.menu.usb.cdc=Serial
-K3495-L433RC.menu.usb.cdc.build.usb_type=USB_TYPE_CDC
-K3495-L433RC.menu.usb.cdc_msc=Serial + Mass Storage
-K3495-L433RC.menu.usb.cdc_msc.build.usb_type=USB_TYPE_CDC_MSC
-K3495-L433RC.menu.usb.cdc_hid=Serial + Keyboard + Mouse
-K3495-L433RC.menu.usb.cdc_hid.build.usb_type=USB_TYPE_CDC_HID
-K3495-L433RC.menu.usb.cdc_msc_hid=Serial + Mass Storage + Keyboard + Mouse
-K3495-L433RC.menu.usb.cdc_msc_hid.build.usb_type=USB_TYPE_CDC_MSC_HID
-K3495-L433RC.menu.usb.cdc_dap=Serial + CMSIS-DAP
-K3495-L433RC.menu.usb.cdc_dap.build.usb_type=USB_TYPE_CDC_DAP
-K3495-L433RC.menu.usb.cdc_msc_dap=Serial + Mass Storage + CMSIS-DAP
-K3495-L433RC.menu.usb.cdc_msc_dap.build.usb_type=USB_TYPE_CDC_MSC_DAP
-K3495-L433RC.menu.usb.cdc_webusb=Serial + WebUSB
-K3495-L433RC.menu.usb.cdc_webusb.build.usb_type=USB_TYPE_CDC_WEBUSB
-K3495-L433RC.menu.usb.cdc_msc_webusb=Serial + Mass Storage + WebUSB
-K3495-L433RC.menu.usb.cdc_msc_webusb.build.usb_type=USB_TYPE_CDC_MSC_WEBUSB
-K3495-L433RC.menu.usb.none=No USB
-K3495-L433RC.menu.usb.none.build.usb_type=USB_TYPE_NONE
-
-K3495-L433RC.menu.dosfs.sdspi=SDCARD (SPI)
-K3495-L433RC.menu.dosfs.sdspi.build.dosfs_sdcard=1
-K3495-L433RC.menu.dosfs.sdspi.build.dosfs_sflash=0
-K3495-L433RC.menu.dosfs.none=None
-K3495-L433RC.menu.dosfs.none.build.dosfs_sdcard=0
-K3495-L433RC.menu.dosfs.none.build.dosfs_sflash=0
 
 K3495-L433RC.menu.speed.80=80 MHz
 K3495-L433RC.menu.speed.80.build.f_cpu=80000000L
@@ -253,15 +227,15 @@ K3495-L433RC.menu.speed.32=32 MHz
 K3495-L433RC.menu.speed.32.build.f_cpu=32000000L
 K3495-L433RC.menu.speed.24=24 MHz
 K3495-L433RC.menu.speed.24.build.f_cpu=24000000L
-K3495-L433RC.menu.speed.16=16 MHz (No USB)
+K3495-L433RC.menu.speed.16=16 MHz
 K3495-L433RC.menu.speed.16.build.f_cpu=16000000L
-K3495-L433RC.menu.speed.8=8 MHz (No USB)
+K3495-L433RC.menu.speed.8=8 MHz
 K3495-L433RC.menu.speed.8.build.f_cpu=8000000L
-K3495-L433RC.menu.speed.4=4 MHz (No USB)
+K3495-L433RC.menu.speed.4=4 MHz
 K3495-L433RC.menu.speed.4.build.f_cpu=4000000L
-K3495-L433RC.menu.speed.2=2 MHz (No USB)
+K3495-L433RC.menu.speed.2=2 MHz
 K3495-L433RC.menu.speed.2.build.f_cpu=2000000L
-K3495-L433RC.menu.speed.1=1 MHz (No USB)
+K3495-L433RC.menu.speed.1=1 MHz
 K3495-L433RC.menu.speed.1.build.f_cpu=1000000L
 
 K3495-L433RC.menu.opt.os=Smallest Code

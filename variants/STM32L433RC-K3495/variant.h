@@ -45,8 +45,6 @@
 #define STM32L4_CONFIG_DAP_SWCLK          GPIO_PIN_PB15
 #define STM32L4_CONFIG_DAP_SWDIO          GPIO_PIN_PB8
 
-#define USBCON
-
 /** Master clock frequency */
 #define VARIANT_MCK			  F_CPU
 
@@ -55,7 +53,6 @@
  *----------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
-#include "USBAPI.h"
 #include "Uart.h"
 #endif // __cplusplus
 
@@ -117,16 +114,16 @@ static const uint8_t ATN = PIN_ATN;
  * Serial interfaces
  */
 
-#define SERIAL_INTERFACES_COUNT 4
+#define SERIAL_INTERFACES_COUNT 3
+
+#define PIN_SERIAL_RX        (8ul)
+#define PIN_SERIAL_TX        (9ul)
 
 #define PIN_SERIAL1_RX       (0ul)
 #define PIN_SERIAL1_TX       (1ul)
 
 #define PIN_SERIAL2_RX       (31ul)
 #define PIN_SERIAL2_TX       (30ul)
-
-#define PIN_SERIAL3_RX       (8ul)
-#define PIN_SERIAL3_TX       (9ul)
 
 /*
  * SPI Interfaces
@@ -147,6 +144,11 @@ static const uint8_t ATN = PIN_ATN;
 
 #define PIN_SPI_SD_ENABLE   GPIO_PIN_PB14
 #define PIN_SPI_SD_POWER    GPIO_PIN_PB11
+
+// On-board SPI Flash
+#define EXTERNAL_FLASH_DEVICES  S25FL064L
+#define EXTERNAL_FLASH_USE_SPI  SPI
+#define EXTERNAL_FLASH_USE_CS   SS
   
 static const uint8_t SS	  = 10;
 static const uint8_t MOSI = PIN_SPI_MOSI;
@@ -194,10 +196,9 @@ static const uint8_t SCL = PIN_WIRE_SCL;
  *----------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
-extern CDC  Serial;
+extern Uart  Serial;
 extern Uart Serial1;
 extern Uart Serial2;
-extern Uart Serial3;
 #endif
 
 // These serial port names are intended to allow libraries and architecture-neutral
@@ -219,10 +220,8 @@ extern Uart Serial3;
 #define SERIAL_PORT_MONITOR         Serial
 #define SERIAL_PORT_HARDWARE1       Serial1
 #define SERIAL_PORT_HARDWARE2       Serial2
-#define SERIAL_PORT_HARDWARE3       Serial3
 #define SERIAL_PORT_HARDWARE_OPEN1  Serial1
 #define SERIAL_PORT_HARDWARE_OPEN2  Serial2
-#define SERIAL_PORT_HARDWARE_OPEN3  Serial3
 
 // Alias SerialUSB to Serial
 #define SerialUSB SERIAL_PORT_USBVIRTUAL

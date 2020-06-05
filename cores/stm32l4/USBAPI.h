@@ -31,6 +31,8 @@
 #include "HardwareSerial.h"
 #include "stm32l4_usbd_cdc.h"
 
+#if defined(USBCON)
+
 #define USB_TYPE_NONE        0
 #define USB_TYPE_CDC         1
 #define USB_TYPE_CDC_MSC     2
@@ -302,3 +304,5 @@ private:
 };
 
 extern KeyboardClass Keyboard;
+
+#endif /* USBCON */
