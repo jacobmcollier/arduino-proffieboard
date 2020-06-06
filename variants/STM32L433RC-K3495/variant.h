@@ -142,15 +142,13 @@ static const uint8_t ATN = PIN_ATN;
 #define PIN_SPI2_MOSI        (5u)
 #define PIN_SPI2_SCK         (3u)
 
-#define PIN_SPI_SD_ENABLE   GPIO_PIN_PB14
-#define PIN_SPI_SD_POWER    GPIO_PIN_PB11
-
 // On-board SPI Flash
-#define EXTERNAL_FLASH_DEVICES  S25FL064L
+#define EXTERNAL_FLASH_DEVICE  S25FL064L
 #define EXTERNAL_FLASH_USE_SPI  SPI
 #define EXTERNAL_FLASH_USE_CS   SS
-  
-static const uint8_t SS	  = 10;
+#define EXTERNAL_FLASH_RST_NOT  11
+
+static const uint8_t SS	  = 4;
 static const uint8_t MOSI = PIN_SPI_MOSI;
 static const uint8_t MISO = PIN_SPI_MISO;
 static const uint8_t SCK  = PIN_SPI_SCK;
