@@ -74,7 +74,7 @@ extern "C"
 // analogRead() uses digital pin numbers.
 #define analogInputToDigitalPin(p)  (p)
 
-// LEDs (not actually a LED)
+// Red LED
 #define PIN_LED_13           (13u)
 #define PIN_LED              PIN_LED_13
 #define LED_BUILTIN          PIN_LED_13
@@ -110,6 +110,8 @@ static const uint8_t BUTTON = PIN_BUTTON;
 #define PIN_ATN              (38u)
 static const uint8_t ATN = PIN_ATN;
 
+#define PIN_POWER_ENABLE              (15u)
+
 /*
  * Serial interfaces
  */
@@ -142,10 +144,10 @@ static const uint8_t ATN = PIN_ATN;
 #define PIN_SPI2_MOSI        (5u)
 #define PIN_SPI2_SCK         (3u)
 
-// Settings for the Winbond W25Q128JV-PM 16MiB SPI flash.
+// Settings for the Winbond W25Q256JV 32MiB SPI flash.
 // Datasheet:
 // https://www.winbond.com/resource-files/w25q256jv%20spi%20revg%2008032017.pdf
-#define W25Q256JV_IQ                                                           \
+#define W25Q256JV                                                              \
   {                                                                            \
     .total_size = (1 << 25), /* 32 MiB */                                      \
         .start_up_time_us = 5000, .manufacturer_id = 0xef,                     \
@@ -157,7 +159,7 @@ static const uint8_t ATN = PIN_ATN;
   }
 
 // On-board SPI Flash
-#define EXTERNAL_FLASH_DEVICE  W25Q256JV_IQ
+#define EXTERNAL_FLASH_DEVICE  W25Q256JV
 #define EXTERNAL_FLASH_USE_SPI  SPI
 #define EXTERNAL_FLASH_USE_CS   SS
 #define EXTERNAL_FLASH_RST_NOT  11

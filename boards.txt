@@ -192,80 +192,80 @@ ProffieboardV2-L433CC.menu.opt.o3.build.flags.ldspecs=
 
 ##############################################################
 
-K3495-L433RC.name=K3495
-K3495-L433RC.vid.0=0x1209
-K3495-L433RC.pid.0=0x6668
+K3495-L433CC.name=K3495
+K3495-L433CC.vid.0=0x1209
+K3495-L433CC.pid.0=0x6668
 
-K3495-L433RC.upload.maximum_size=262144
-K3495-L433RC.upload.maximum_data_size=32768
+K3495-L433CC.upload.maximum_size=262144
+K3495-L433CC.upload.maximum_data_size=32768
 
-K3495-L433RC.build.mcu=cortex-m4
-K3495-L433RC.build.f_cpu=80000000L
-K3495-L433RC.build.board=STM32L4_K3495
-K3495-L433RC.build.arch=STM32L4
-K3495-L433RC.build.core=stm32l4
-K3495-L433RC.build.vid=0x1209
-K3495-L433RC.build.pid=0x6668
-K3495-L433RC.build.did=0xffff
-K3495-L433RC.build.usb_manufacturer="hubbe.net"
-K3495-L433RC.build.usb_product="K3495"
-K3495-L433RC.build.extra_flags=-DSTM32L433xx -DPROFFIEBOARD_VERSION=2 -D__FPU_PRESENT=1 -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mabi=aapcs -mslow-flash-data -fsingle-precision-constant -felide-constructors -ffast-math {build.usb_flags}
-K3495-L433RC.build.ldscript=linker_scripts/STM32L433RC_FLASH.ld
-K3495-L433RC.build.variant=STM32L433RC-K3495
-K3495-L433RC.build.variant_system_libs="-L{runtime.platform.path}/system/STM32L4xx/Lib" "-L{runtime.platform.path}/system/CMSIS/Lib" -lstm32l433 -larm_cortexM4lf_math
-K3495-L433RC.build.variant_system_include="-I{runtime.platform.path}/system/CMSIS/Include" "-I{runtime.platform.path}/system/CMSIS/Device/ST/STM32L4xx/Include" "-I{runtime.platform.path}/system/STM32L4xx/Include" 
+K3495-L433CC.build.mcu=cortex-m4
+K3495-L433CC.build.f_cpu=80000000L
+K3495-L433CC.build.board=STM32L4_K3495
+K3495-L433CC.build.arch=STM32L4
+K3495-L433CC.build.core=stm32l4
+K3495-L433CC.build.vid=0x1209
+K3495-L433CC.build.pid=0x6668
+K3495-L433CC.build.did=0xffff
+K3495-L433CC.build.usb_manufacturer="hubbe.net"
+K3495-L433CC.build.usb_product="K3495"
+K3495-L433CC.build.extra_flags=-DSTM32L433xx -DPROFFIEBOARD_VERSION=2 -D__FPU_PRESENT=1 -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mabi=aapcs -mslow-flash-data -fsingle-precision-constant -felide-constructors -ffast-math {build.usb_flags}
+K3495-L433CC.build.ldscript=linker_scripts/STM32L433CC_FLASH.ld
+K3495-L433CC.build.variant=STM32L433CC-K3495
+K3495-L433CC.build.variant_system_libs="-L{runtime.platform.path}/system/STM32L4xx/Lib" "-L{runtime.platform.path}/system/CMSIS/Lib" -lstm32l433 -larm_cortexM4lf_math
+K3495-L433CC.build.variant_system_include="-I{runtime.platform.path}/system/CMSIS/Include" "-I{runtime.platform.path}/system/CMSIS/Device/ST/STM32L4xx/Include" "-I{runtime.platform.path}/system/STM32L4xx/Include" 
 
-K3495-L433RC.menu.speed.80=80 MHz
-K3495-L433RC.menu.speed.80.build.f_cpu=80000000L
-K3495-L433RC.menu.speed.72=72 MHz
-K3495-L433RC.menu.speed.72.build.f_cpu=72000000L
-K3495-L433RC.menu.speed.64=64 MHz
-K3495-L433RC.menu.speed.64.build.f_cpu=64000000L
-K3495-L433RC.menu.speed.48=48 MHz
-K3495-L433RC.menu.speed.48.build.f_cpu=48000000L
-K3495-L433RC.menu.speed.32=32 MHz
-K3495-L433RC.menu.speed.32.build.f_cpu=32000000L
-K3495-L433RC.menu.speed.24=24 MHz
-K3495-L433RC.menu.speed.24.build.f_cpu=24000000L
-K3495-L433RC.menu.speed.16=16 MHz
-K3495-L433RC.menu.speed.16.build.f_cpu=16000000L
-K3495-L433RC.menu.speed.8=8 MHz
-K3495-L433RC.menu.speed.8.build.f_cpu=8000000L
-K3495-L433RC.menu.speed.4=4 MHz
-K3495-L433RC.menu.speed.4.build.f_cpu=4000000L
-K3495-L433RC.menu.speed.2=2 MHz
-K3495-L433RC.menu.speed.2.build.f_cpu=2000000L
-K3495-L433RC.menu.speed.1=1 MHz
-K3495-L433RC.menu.speed.1.build.f_cpu=1000000L
+K3495-L433CC.menu.speed.80=80 MHz
+K3495-L433CC.menu.speed.80.build.f_cpu=80000000L
+K3495-L433CC.menu.speed.72=72 MHz
+K3495-L433CC.menu.speed.72.build.f_cpu=72000000L
+K3495-L433CC.menu.speed.64=64 MHz
+K3495-L433CC.menu.speed.64.build.f_cpu=64000000L
+K3495-L433CC.menu.speed.48=48 MHz
+K3495-L433CC.menu.speed.48.build.f_cpu=48000000L
+K3495-L433CC.menu.speed.32=32 MHz
+K3495-L433CC.menu.speed.32.build.f_cpu=32000000L
+K3495-L433CC.menu.speed.24=24 MHz
+K3495-L433CC.menu.speed.24.build.f_cpu=24000000L
+K3495-L433CC.menu.speed.16=16 MHz
+K3495-L433CC.menu.speed.16.build.f_cpu=16000000L
+K3495-L433CC.menu.speed.8=8 MHz
+K3495-L433CC.menu.speed.8.build.f_cpu=8000000L
+K3495-L433CC.menu.speed.4=4 MHz
+K3495-L433CC.menu.speed.4.build.f_cpu=4000000L
+K3495-L433CC.menu.speed.2=2 MHz
+K3495-L433CC.menu.speed.2.build.f_cpu=2000000L
+K3495-L433CC.menu.speed.1=1 MHz
+K3495-L433CC.menu.speed.1.build.f_cpu=1000000L
 
-K3495-L433RC.menu.opt.os=Smallest Code
-K3495-L433RC.menu.opt.os.build.flags.optimize=-Os
-K3495-L433RC.menu.opt.os.build.flags.ldspecs=--specs=nano.specs
-K3495-L433RC.menu.opt.o1=Fast
-K3495-L433RC.menu.opt.o1.build.flags.optimize=-O1
-K3495-L433RC.menu.opt.o1.build.flags.ldspecs=
-K3495-L433RC.menu.opt.o2=Faster
-K3495-L433RC.menu.opt.o2.build.flags.optimize=-O2
-K3495-L433RC.menu.opt.o2.build.flags.ldspecs=
-K3495-L433RC.menu.opt.o3=Fastest
-K3495-L433RC.menu.opt.o3.build.flags.optimize=-O3
-K3495-L433RC.menu.opt.o3.build.flags.ldspecs=
+K3495-L433CC.menu.opt.os=Smallest Code
+K3495-L433CC.menu.opt.os.build.flags.optimize=-Os
+K3495-L433CC.menu.opt.os.build.flags.ldspecs=--specs=nano.specs
+K3495-L433CC.menu.opt.o1=Fast
+K3495-L433CC.menu.opt.o1.build.flags.optimize=-O1
+K3495-L433CC.menu.opt.o1.build.flags.ldspecs=
+K3495-L433CC.menu.opt.o2=Faster
+K3495-L433CC.menu.opt.o2.build.flags.optimize=-O2
+K3495-L433CC.menu.opt.o2.build.flags.ldspecs=
+K3495-L433CC.menu.opt.o3=Fastest
+K3495-L433CC.menu.opt.o3.build.flags.optimize=-O3
+K3495-L433CC.menu.opt.o3.build.flags.ldspecs=
 
 # Upload menu
-K3495-L433RC.menu.upload_method.swdMethod=STM32CubeProgrammer (SWD)
-K3495-L433RC.menu.upload_method.swdMethod.upload.protocol=0
-K3495-L433RC.menu.upload_method.swdMethod.upload.options=-g
-K3495-L433RC.menu.upload_method.swdMethod.upload.tool=stm32CubeProg
+K3495-L433CC.menu.upload_method.swdMethod=STM32CubeProgrammer (SWD)
+K3495-L433CC.menu.upload_method.swdMethod.upload.protocol=0
+K3495-L433CC.menu.upload_method.swdMethod.upload.options=-g
+K3495-L433CC.menu.upload_method.swdMethod.upload.tool=stm32CubeProg
 
-K3495-L433RC.menu.upload_method.serialMethod=STM32CubeProgrammer (Serial)
-K3495-L433RC.menu.upload_method.serialMethod.upload.protocol=1
-K3495-L433RC.menu.upload_method.serialMethod.upload.options={serial.port.file} -s
-K3495-L433RC.menu.upload_method.serialMethod.upload.tool=stm32CubeProg
+K3495-L433CC.menu.upload_method.serialMethod=STM32CubeProgrammer (Serial)
+K3495-L433CC.menu.upload_method.serialMethod.upload.protocol=1
+K3495-L433CC.menu.upload_method.serialMethod.upload.options={serial.port.file} -s
+K3495-L433CC.menu.upload_method.serialMethod.upload.tool=stm32CubeProg
 
-K3495-L433RC.menu.upload_method.dfuMethod=STM32CubeProgrammer (DFU)
-K3495-L433RC.menu.upload_method.dfuMethod.upload.protocol=2
-K3495-L433RC.menu.upload_method.dfuMethod.upload.options=-g
-K3495-L433RC.menu.upload_method.dfuMethod.upload.tool=stm32CubeProg
+K3495-L433CC.menu.upload_method.dfuMethod=STM32CubeProgrammer (DFU)
+K3495-L433CC.menu.upload_method.dfuMethod.upload.protocol=2
+K3495-L433CC.menu.upload_method.dfuMethod.upload.options=-g
+K3495-L433CC.menu.upload_method.dfuMethod.upload.tool=stm32CubeProg
 
 ##############################################################
 
