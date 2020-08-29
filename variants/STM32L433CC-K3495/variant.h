@@ -144,19 +144,6 @@ static const uint8_t ATN = PIN_ATN;
 #define PIN_SPI2_MOSI        (5u)
 #define PIN_SPI2_SCK         (3u)
 
-// Settings for the Winbond W25Q256JV 32MiB SPI flash.
-// Datasheet:
-// https://www.winbond.com/resource-files/w25q256jv%20spi%20revg%2008032017.pdf
-#define W25Q256JV                                                              \
-  {                                                                            \
-    .total_size = (1 << 25), /* 32 MiB */                                      \
-        .start_up_time_us = 5000, .manufacturer_id = 0xef,                     \
-    .memory_type = 0x40, .capacity = 0x19, .max_clock_speed_mhz = 133,         \
-    .quad_enable_bit_mask = 0x02, .has_sector_protection = false,              \
-    .supports_fast_read = true, .supports_qspi = true,                         \
-    .supports_qspi_writes = true, .write_status_register_split = false,        \
-    .single_status_byte = false,                                               \
-  }
 
 // On-board SPI Flash
 #define EXTERNAL_FLASH_DEVICE  W25Q256JV
